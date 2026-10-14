@@ -21,6 +21,7 @@ import { BookmarksDrawer } from './components/BookmarksDrawer';
 import { TopAggregatedModule } from './components/TopAggregatedModule';
 import { MyNewsPage } from './components/MyNewsPage';
 import { AlgorithmExplainerModal } from './components/AlgorithmExplainerModal';
+import { GlobalDailyDigest } from './components/GlobalDailyDigest';
 import { Footer } from './components/Footer';
 import { Sparkles, Compass, Newspaper, Check } from 'lucide-react';
 
@@ -180,6 +181,16 @@ export default function App() {
     setSelectedArticle(article);
   };
 
+  const handleScrollToDigest = () => {
+    setCurrentView('portal');
+    setTimeout(() => {
+      const el = document.getElementById('daily-digest');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
+  };
+
   // Top 10 Aggregated Articles computed via multi-factor algorithm
   const top10AggregatedArticles: RankedArticle[] = useMemo(() => {
     return getTop10AggregatedArticles(WORLD_ARTICLES, algorithmWeights);
@@ -307,6 +318,7 @@ export default function App() {
         savedCount={savedIds.length}
         onOpenSaved={() => setIsBookmarksOpen(true)}
         onOpenAudioBriefing={() => setIsAudioBriefingOpen(true)}
+        onScrollToDigest={handleScrollToDigest}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode((prev) => !prev)}
         onFocusSearch={() => {
@@ -459,6 +471,16 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* GLOBAL DAILY DIGEST SUBSCRIPTION COMPONENT */}
+                  <div id="daily-digest" className="mb-12">
+                    <GlobalDailyDigest
+                      articles={WORLD_ARTICLES}
+                      currentLanguage={currentLanguage}
+                      ui={ui}
+                      onSelectArticle={(art) => setSelectedArticle(art)}
+                    />
+                  </div>
+
                   {/* Salience Tier 3: Compact Wire Dispatches & Opinion Column */}
                   {remainingWireStories.length > 0 && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-stone-200 dark:border-stone-800 pt-8">
@@ -514,22 +536,33 @@ export default function App() {
                 </>
               ) : (
                 /* Filtered Results Standard Grid */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredArticles.map((story) => (
-                    <EditorialCard
-                      key={story.id}
-                      article={story}
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredArticles.map((story) => (
+                      <EditorialCard
+                        key={story.id}
+                        article={story}
+                        currentLanguage={currentLanguage}
+                        ui={ui}
+                        variant="standard"
+                        isSaved={savedIds.includes(story.id)}
+                        onSelectArticle={(art) => setSelectedArticle(art)}
+                        onToggleSave={handleToggleSave}
+                        onShare={handleShare}
+                        onListen={handleQuickListen}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-12">
+                    <GlobalDailyDigest
+                      articles={WORLD_ARTICLES}
                       currentLanguage={currentLanguage}
                       ui={ui}
-                      variant="standard"
-                      isSaved={savedIds.includes(story.id)}
                       onSelectArticle={(art) => setSelectedArticle(art)}
-                      onToggleSave={handleToggleSave}
-                      onShare={handleShare}
-                      onListen={handleQuickListen}
                     />
-                  ))}
-                </div>
+                  </div>
+                </>
               )}
             </>
           )}

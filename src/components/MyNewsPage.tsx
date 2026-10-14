@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Article, Language, NewsCategory, UserFeedConfig } from '../types/news';
 import { UIStrings } from '../data/languages';
 import { EditorialCard } from './EditorialCard';
+import { GlobalDailyDigest } from './GlobalDailyDigest';
 import { getDistinctSources } from '../utils/rankingAlgorithm';
 import {
   SlidersHorizontal,
@@ -340,6 +341,16 @@ export const MyNewsPage: React.FC<MyNewsPageProps> = ({
           ))}
         </div>
       )}
+
+      {/* Embedded Global Daily Digest Component */}
+      <div className="mt-12">
+        <GlobalDailyDigest
+          articles={articles}
+          currentLanguage={currentLanguage}
+          ui={ui}
+          onSelectArticle={onSelectArticle}
+        />
+      </div>
     </div>
   );
 };

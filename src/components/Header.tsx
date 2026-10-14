@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Language, NewsCategory, Region } from '../types/news';
 import { SUPPORTED_LANGUAGES, UIStrings } from '../data/languages';
-import { Globe, Bookmark, Radio, Search, Moon, Sun, ChevronDown } from 'lucide-react';
+import { Globe, Bookmark, Radio, Search, Moon, Sun, ChevronDown, Mail } from 'lucide-react';
 
 interface HeaderProps {
   currentLanguage: Language;
@@ -14,6 +14,7 @@ interface HeaderProps {
   savedCount: number;
   onOpenSaved: () => void;
   onOpenAudioBriefing: () => void;
+  onScrollToDigest?: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onFocusSearch: () => void;
@@ -30,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   savedCount,
   onOpenSaved,
   onOpenAudioBriefing,
+  onScrollToDigest,
   darkMode,
   onToggleDarkMode,
   onFocusSearch,
@@ -149,6 +151,18 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Search className="w-4 h-4" />
             </button>
+
+            {/* Daily Digest opt-in trigger */}
+            {onScrollToDigest && (
+              <button
+                onClick={onScrollToDigest}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors whitespace-nowrap shrink-0"
+                title="Global Daily Digest"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#9A3412]" />
+                <span>Daily Digest</span>
+              </button>
+            )}
 
             {/* Audio bulletin button */}
             <button

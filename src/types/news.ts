@@ -145,3 +145,11 @@ export interface BureauClock {
   marketOpen: boolean;
 }
 
+export interface DigestSubscription {
+  email: string;
+  frequency: 'morning' | 'evening' | 'both';
+  topics: string[];
+  language: Language;
+  subscribedAt: string;
+}
+
