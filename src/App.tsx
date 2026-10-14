@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Article, Language, NewsCategory, Region } from './types/news';
+import { Article, Language, NewsCategory, Region, AlgorithmWeights, UserFeedConfig, RankedArticle } from './types/news';
 import { SUPPORTED_LANGUAGES, UI_TRANSLATIONS } from './data/languages';
 import { WORLD_ARTICLES } from './data/mockArticles';
 import { INITIAL_MARKET_DATA, WORLD_BUREAUS } from './data/marketAndClocks';
+import { getTop10AggregatedArticles, DEFAULT_ALGORITHM_WEIGHTS } from './utils/rankingAlgorithm';
 import { Header } from './components/Header';
 import { BureauClockBar } from './components/BureauClockBar';
 import { BreakingTicker } from './components/BreakingTicker';
@@ -17,10 +18,16 @@ import { EditorialCard } from './components/EditorialCard';
 import { ArticleModal } from './components/ArticleModal';
 import { AudioBriefingModal } from './components/AudioBriefingModal';
 import { BookmarksDrawer } from './components/BookmarksDrawer';
+import { TopAggregatedModule } from './components/TopAggregatedModule';
+import { MyNewsPage } from './components/MyNewsPage';
+import { AlgorithmExplainerModal } from './components/AlgorithmExplainerModal';
 import { Footer } from './components/Footer';
 import { Sparkles, Compass, Newspaper, Check } from 'lucide-react';
 
 export default function App() {
+  // Navigation view: main broadsheet portal vs dedicated 'my-news' feed page
+  const [currentView, setCurrentView] = useState<'portal' | 'my-news'>('portal');
+
   // Persistence for language & theme
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem('global_chronicle_lang');
@@ -36,10 +43,43 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'latest' | 'breaking' | 'mostRead'>('latest');
 
+  // Algorithm weights state
+  const [algorithmWeights, setAlgorithmWeights] = useState<AlgorithmWeights>(() => {
+    try {
+      const saved = localStorage.getItem('global_chronicle_weights');
+      return saved ? JSON.parse(saved) : DEFAULT_ALGORITHM_WEIGHTS;
+    } catch {
+      return DEFAULT_ALGORITHM_WEIGHTS;
+    }
+  });
+
+  // User Feed preferences state
+  const [userFeedConfig, setUserFeedConfig] = useState<UserFeedConfig>(() => {
+    try {
+      const saved = localStorage.getItem('global_chronicle_user_feed');
+      return saved
+        ? JSON.parse(saved)
+        : {
+            selectedCategories: ['tech', 'sports', 'politics', 'entertainment', 'business', 'climate'],
+            selectedSources: ['Reuters', 'Associated Press', 'BBC News', 'Bloomberg', 'Agence France-Presse', 'Variety'],
+            keywordFilter: '',
+            minScore: 0,
+          };
+    } catch {
+      return {
+        selectedCategories: ['tech', 'sports', 'politics', 'entertainment', 'business', 'climate'],
+        selectedSources: ['Reuters', 'Associated Press', 'BBC News', 'Bloomberg', 'Agence France-Presse', 'Variety'],
+        keywordFilter: '',
+        minScore: 0,
+      };
+    }
+  });
+
   // Modals and drawers
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
   const [isAudioBriefingOpen, setIsAudioBriefingOpen] = useState(false);
+  const [isAlgorithmModalOpen, setIsAlgorithmModalOpen] = useState(false);
   const [focusSearchTrigger, setFocusSearchTrigger] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -47,7 +87,7 @@ export default function App() {
   const [savedIds, setSavedIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('global_chronicle_bookmarks');
-      return saved ? JSON.parse(saved) : ['world-summit-treaty-2026'];
+      return saved ? JSON.parse(saved) : ['world-summit-treaty-2026', 'bloomberg-ai-semiconductor-consortium-2026'];
     } catch {
       return ['world-summit-treaty-2026'];
     }
@@ -83,6 +123,18 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('global_chronicle_bookmarks', JSON.stringify(savedIds));
   }, [savedIds]);
+
+  // Sync algorithm weights
+  useEffect(() => {
+    localStorage.setItem('global_chronicle_weights', JSON.stringify(algorithmWeights));
+  }, [algorithmWeights]);
+
+  // Sync user feed preferences
+  const handleUpdateFeedConfig = (newConfig: UserFeedConfig) => {
+    setUserFeedConfig(newConfig);
+    localStorage.setItem('global_chronicle_user_feed', JSON.stringify(newConfig));
+    showToast('Personalized feed preferences updated');
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -128,6 +180,11 @@ export default function App() {
     setSelectedArticle(article);
   };
 
+  // Top 10 Aggregated Articles computed via multi-factor algorithm
+  const top10AggregatedArticles: RankedArticle[] = useMemo(() => {
+    return getTop10AggregatedArticles(WORLD_ARTICLES, algorithmWeights);
+  }, [algorithmWeights]);
+
   // Article count by region for map
   const articleCountsByRegion = useMemo(() => {
     const counts: Record<Region, number> = {
@@ -147,7 +204,7 @@ export default function App() {
     return counts;
   }, []);
 
-  // Filtered & sorted articles
+  // Filtered & sorted articles for portal view
   const filteredArticles = useMemo(() => {
     let result = [...WORLD_ARTICLES];
 
@@ -238,220 +295,260 @@ export default function App() {
         activeCategory={activeCategory}
         onSelectCategory={(cat) => {
           setActiveCategory(cat);
+          setCurrentView('portal');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         activeRegion={activeRegion}
-        onSelectRegion={(reg) => setActiveRegion(reg)}
+        onSelectRegion={(reg) => {
+          setActiveRegion(reg);
+          setCurrentView('portal');
+        }}
         ui={ui}
         savedCount={savedIds.length}
         onOpenSaved={() => setIsBookmarksOpen(true)}
         onOpenAudioBriefing={() => setIsAudioBriefingOpen(true)}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode((prev) => !prev)}
-        onFocusSearch={() => setFocusSearchTrigger((prev) => prev + 1)}
+        onFocusSearch={() => {
+          setCurrentView('portal');
+          setFocusSearchTrigger((prev) => prev + 1);
+        }}
+        currentView={currentView}
+        onSelectView={(view) => {
+          setCurrentView(view);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
       />
 
-      {/* Main Content Arena */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full py-8">
-        {/* Search, Region & Sort Toolbar */}
-        <SearchFilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          activeRegion={activeRegion}
-          onSelectRegion={setActiveRegion}
-          activeCategory={activeCategory}
-          onSelectCategory={setActiveCategory}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          ui={ui}
-          totalResults={filteredArticles.length}
-          onResetFilters={handleResetFilters}
-          isFiltered={isFiltered}
-          focusTrigger={focusSearchTrigger}
-        />
+      {/* 4. Main Arena */}
+      {currentView === 'my-news' ? (
+        /* Dedicated 'My News' Customizable Feed Page */
+        <main className="flex-1 w-full py-4">
+          <MyNewsPage
+            articles={WORLD_ARTICLES}
+            currentLanguage={currentLanguage}
+            ui={ui}
+            feedConfig={userFeedConfig}
+            onUpdateFeedConfig={handleUpdateFeedConfig}
+            onSelectArticle={(art) => setSelectedArticle(art)}
+            savedIds={savedIds}
+            onToggleSave={handleToggleSave}
+            onShare={handleShare}
+          />
+        </main>
+      ) : (
+        /* Main Global Chronicle Broadsheet Portal */
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full py-8">
+          {/* Search, Region & Sort Toolbar */}
+          <SearchFilterBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            activeRegion={activeRegion}
+            onSelectRegion={setActiveRegion}
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            ui={ui}
+            totalResults={filteredArticles.length}
+            onResetFilters={handleResetFilters}
+            isFiltered={isFiltered}
+            focusTrigger={focusSearchTrigger}
+          />
 
-        {/* Section Heading Banner when filtered */}
-        {isFiltered && (
-          <div className="mb-6 pb-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#9A3412] font-semibold">
-                {ui.regions[activeRegion] || activeRegion} · {ui.categories[activeCategory] || activeCategory}
-              </span>
-              <h2 className="font-editorial text-2xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">
-                {activeCategory === 'all' ? ui.allRegions : ui.categories[activeCategory]}
-              </h2>
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {filteredArticles.length === 0 ? (
-          <div className="py-24 text-center border border-dashed border-stone-300 dark:border-stone-800 bg-white/50 dark:bg-stone-900/40 p-8 my-8">
-            <Newspaper className="w-10 h-10 text-stone-400 mx-auto mb-3" />
-            <h3 className="font-editorial text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">
-              {ui.noArticlesFound}
-            </h3>
-            <p className="text-stone-500 text-sm font-serif italic mb-6">
-              Try adjusting your query, selecting a different region, or switching to the Front Page.
-            </p>
-            <button
-              onClick={handleResetFilters}
-              className="px-5 py-2.5 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-mono text-xs font-semibold hover:bg-[#9A3412] dark:hover:bg-[#9A3412] dark:hover:text-white transition-colors"
-            >
-              {ui.resetFilters}
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Front Page Broadsheet Hierarchy */}
-            {!isFiltered ? (
-              <>
-                {/* Salience Tier 1: Dominant Lead Story */}
-                {leadStory && (
-                  <EditorialCard
-                    article={leadStory}
-                    currentLanguage={currentLanguage}
-                    ui={ui}
-                    variant="lead"
-                    isSaved={savedIds.includes(leadStory.id)}
-                    onSelectArticle={(art) => setSelectedArticle(art)}
-                    onToggleSave={handleToggleSave}
-                    onShare={handleShare}
-                    onListen={handleQuickListen}
-                  />
-                )}
-
-                {/* Interactive World Regional Map & Hotspot Explorer */}
-                <InteractiveWorldMap
-                  activeRegion={activeRegion}
-                  onSelectRegion={(reg) => {
-                    setActiveRegion(reg);
-                    window.scrollTo({ top: 380, behavior: 'smooth' });
-                  }}
-                  ui={ui}
-                  articleCountsByRegion={articleCountsByRegion}
-                />
-
-                {/* Salience Tier 2: 3-Column Bento Grid of Featured Dispatches */}
-                <div className="mb-12">
-                  <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800 mb-6">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#9A3412]" />
-                      <h3 className="font-editorial text-xl font-bold text-stone-900 dark:text-stone-100">
-                        {ui.editorsPick}
-                      </h3>
-                    </div>
-                    <span className="text-xs font-mono text-stone-500">
-                      Independent Wire · 10 Languages
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {secondaryStories.map((story) => (
-                      <EditorialCard
-                        key={story.id}
-                        article={story}
-                        currentLanguage={currentLanguage}
-                        ui={ui}
-                        variant="featured"
-                        isSaved={savedIds.includes(story.id)}
-                        onSelectArticle={(art) => setSelectedArticle(art)}
-                        onToggleSave={handleToggleSave}
-                        onShare={handleShare}
-                        onListen={handleQuickListen}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Salience Tier 3: Compact Wire Dispatches & Opinion Column */}
-                {remainingWireStories.length > 0 && (
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-stone-200 dark:border-stone-800 pt-8">
-                    {/* Left Column: Continuous Global Wire (8 cols) */}
-                    <div className="lg:col-span-8">
-                      <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800 mb-4">
-                        <div className="flex items-center gap-2">
-                          <Compass className="w-4 h-4 text-[#9A3412]" />
-                          <h3 className="font-editorial text-lg font-bold text-stone-900 dark:text-stone-100">
-                            {ui.latestNews}
-                          </h3>
-                        </div>
-                        <span className="text-xs font-mono text-stone-400">
-                          Live Global Telemetry
-                        </span>
-                      </div>
-
-                      <div className="divide-y divide-stone-200 dark:divide-stone-800 border-t border-stone-200 dark:border-stone-800">
-                        {remainingWireStories.map((story) => (
-                          <EditorialCard
-                            key={story.id}
-                            article={story}
-                            currentLanguage={currentLanguage}
-                            ui={ui}
-                            variant="compact"
-                            isSaved={savedIds.includes(story.id)}
-                            onSelectArticle={(art) => setSelectedArticle(art)}
-                            onToggleSave={handleToggleSave}
-                            onShare={handleShare}
-                            onListen={handleQuickListen}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Right Column: Opinion & Multilingual Editorial Statement (4 cols) */}
-                    <div className="lg:col-span-4 bg-stone-50 dark:bg-stone-900/60 p-6 border border-stone-200 dark:border-stone-800">
-                      <span className="text-[11px] font-mono uppercase tracking-widest text-[#9A3412] font-semibold block mb-2">
-                        Institutional Editorial
-                      </span>
-                      <h4 className="font-editorial text-lg font-bold text-stone-950 dark:text-stone-50 mb-3 leading-snug">
-                        The Global Chronicle Charter
-                      </h4>
-                      <p className="text-xs font-serif italic text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
-                        "In an era fractured by algorithmic echo-chambers, our editorial duty is to present verified, deeply researched reports spanning every continent in the native languages of our global readership."
-                      </p>
-                      <div className="border-t border-stone-200 dark:border-stone-700/80 pt-3 text-[11px] font-mono text-stone-500">
-                        <span>Editorial Board · Geneva, London, Tokyo</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              /* Filtered Results Standard Grid */
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredArticles.map((story) => (
-                  <EditorialCard
-                    key={story.id}
-                    article={story}
-                    currentLanguage={currentLanguage}
-                    ui={ui}
-                    variant="standard"
-                    isSaved={savedIds.includes(story.id)}
-                    onSelectArticle={(art) => setSelectedArticle(art)}
-                    onToggleSave={handleToggleSave}
-                    onShare={handleShare}
-                    onListen={handleQuickListen}
-                  />
-                ))}
+          {/* Section Heading Banner when filtered */}
+          {isFiltered && (
+            <div className="mb-6 pb-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#9A3412] font-semibold">
+                  {ui.regions[activeRegion] || activeRegion} · {ui.categories[activeCategory] || activeCategory}
+                </span>
+                <h2 className="font-editorial text-2xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+                  {activeCategory === 'all' ? ui.allRegions : ui.categories[activeCategory]}
+                </h2>
               </div>
-            )}
-          </>
-        )}
-      </main>
+            </div>
+          )}
 
-      {/* 4. Newspaper Broadsheet Footer */}
+          {/* Empty State */}
+          {filteredArticles.length === 0 ? (
+            <div className="py-24 text-center border border-dashed border-stone-300 dark:border-stone-800 bg-white/50 dark:bg-stone-900/40 p-8 my-8">
+              <Newspaper className="w-10 h-10 text-stone-400 mx-auto mb-3" />
+              <h3 className="font-editorial text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">
+                {ui.noArticlesFound}
+              </h3>
+              <p className="text-stone-500 text-sm font-serif italic mb-6">
+                Try adjusting your query, selecting a different region, or switching to the Front Page.
+              </p>
+              <button
+                onClick={handleResetFilters}
+                className="px-5 py-2.5 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-mono text-xs font-semibold hover:bg-[#9A3412] dark:hover:bg-[#9A3412] dark:hover:text-white transition-colors"
+              >
+                {ui.resetFilters}
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Front Page Broadsheet Hierarchy */}
+              {!isFiltered ? (
+                <>
+                  {/* Salience Tier 1: Dominant Lead Story */}
+                  {leadStory && (
+                    <EditorialCard
+                      article={leadStory}
+                      currentLanguage={currentLanguage}
+                      ui={ui}
+                      variant="lead"
+                      isSaved={savedIds.includes(leadStory.id)}
+                      onSelectArticle={(art) => setSelectedArticle(art)}
+                      onToggleSave={handleToggleSave}
+                      onShare={handleShare}
+                      onListen={handleQuickListen}
+                    />
+                  )}
+
+                  {/* PROMINENT TOP 10 AGGREGATED ARTICLES MODULE (Ranked by multi-factor algorithm) */}
+                  <TopAggregatedModule
+                    topArticles={top10AggregatedArticles}
+                    currentLanguage={currentLanguage}
+                    ui={ui}
+                    onSelectArticle={(art) => setSelectedArticle(art)}
+                    onOpenAlgorithmConfig={() => setIsAlgorithmModalOpen(true)}
+                  />
+
+                  {/* Interactive World Regional Map & Hotspot Explorer */}
+                  <InteractiveWorldMap
+                    activeRegion={activeRegion}
+                    onSelectRegion={(reg) => {
+                      setActiveRegion(reg);
+                      window.scrollTo({ top: 400, behavior: 'smooth' });
+                    }}
+                    ui={ui}
+                    articleCountsByRegion={articleCountsByRegion}
+                  />
+
+                  {/* Salience Tier 2: Bento Grid of Featured Dispatches */}
+                  <div className="mb-12">
+                    <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#9A3412]" />
+                        <h3 className="font-editorial text-xl font-bold text-stone-900 dark:text-stone-100">
+                          {ui.editorsPick}
+                        </h3>
+                      </div>
+                      <span className="text-xs font-mono text-stone-500">
+                        Independent Wire · 10 Languages
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {secondaryStories.map((story) => (
+                        <EditorialCard
+                          key={story.id}
+                          article={story}
+                          currentLanguage={currentLanguage}
+                          ui={ui}
+                          variant="featured"
+                          isSaved={savedIds.includes(story.id)}
+                          onSelectArticle={(art) => setSelectedArticle(art)}
+                          onToggleSave={handleToggleSave}
+                          onShare={handleShare}
+                          onListen={handleQuickListen}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Salience Tier 3: Compact Wire Dispatches & Opinion Column */}
+                  {remainingWireStories.length > 0 && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-stone-200 dark:border-stone-800 pt-8">
+                      {/* Left Column: Continuous Global Wire (8 cols) */}
+                      <div className="lg:col-span-8">
+                        <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800 mb-4">
+                          <div className="flex items-center gap-2">
+                            <Compass className="w-4 h-4 text-[#9A3412]" />
+                            <h3 className="font-editorial text-lg font-bold text-stone-900 dark:text-stone-100">
+                              {ui.latestNews}
+                            </h3>
+                          </div>
+                          <span className="text-xs font-mono text-stone-400">
+                            Live Global Telemetry
+                          </span>
+                        </div>
+
+                        <div className="divide-y divide-stone-200 dark:divide-stone-800 border-t border-stone-200 dark:border-stone-800">
+                          {remainingWireStories.map((story) => (
+                            <EditorialCard
+                              key={story.id}
+                              article={story}
+                              currentLanguage={currentLanguage}
+                              ui={ui}
+                              variant="compact"
+                              isSaved={savedIds.includes(story.id)}
+                              onSelectArticle={(art) => setSelectedArticle(art)}
+                              onToggleSave={handleToggleSave}
+                              onShare={handleShare}
+                              onListen={handleQuickListen}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right Column: Opinion & Multilingual Editorial Statement (4 cols) */}
+                      <div className="lg:col-span-4 bg-stone-50 dark:bg-stone-900/60 p-6 border border-stone-200 dark:border-stone-800">
+                        <span className="text-[11px] font-mono uppercase tracking-widest text-[#9A3412] font-semibold block mb-2">
+                          Institutional Editorial
+                        </span>
+                        <h4 className="font-editorial text-lg font-bold text-stone-950 dark:text-stone-50 mb-3 leading-snug">
+                          The Global Chronicle Charter
+                        </h4>
+                        <p className="text-xs font-serif italic text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
+                          "In an era fractured by algorithmic echo-chambers, our editorial duty is to present verified, deeply researched reports spanning every continent in the native languages of our global readership."
+                        </p>
+                        <div className="border-t border-stone-200 dark:border-stone-700/80 pt-3 text-[11px] font-mono text-stone-500">
+                          <span>Editorial Board · Geneva, London, Tokyo</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Filtered Results Standard Grid */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredArticles.map((story) => (
+                    <EditorialCard
+                      key={story.id}
+                      article={story}
+                      currentLanguage={currentLanguage}
+                      ui={ui}
+                      variant="standard"
+                      isSaved={savedIds.includes(story.id)}
+                      onSelectArticle={(art) => setSelectedArticle(art)}
+                      onToggleSave={handleToggleSave}
+                      onShare={handleShare}
+                      onListen={handleQuickListen}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      )}
+
+      {/* 5. Newspaper Broadsheet Footer */}
       <Footer
         currentLanguage={currentLanguage}
         onSelectLanguage={(lang) => setCurrentLanguage(lang)}
         onSelectCategory={(cat) => {
           setActiveCategory(cat);
+          setCurrentView('portal');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         ui={ui}
       />
 
-      {/* 5. Full Article Reader Modal with on-demand translation & TTS */}
+      {/* 6. Full Article Reader Modal with on-demand translation & TTS */}
       <ArticleModal
         article={selectedArticle}
         currentLanguage={currentLanguage}
@@ -463,7 +560,7 @@ export default function App() {
         allArticles={WORLD_ARTICLES}
       />
 
-      {/* 6. Daily 60-Second Radio Audio Briefing Modal */}
+      {/* 7. Daily 60-Second Radio Audio Briefing Modal */}
       {isAudioBriefingOpen && (
         <AudioBriefingModal
           articles={WORLD_ARTICLES}
@@ -474,7 +571,7 @@ export default function App() {
         />
       )}
 
-      {/* 7. Bookmarks Reading List Drawer */}
+      {/* 8. Bookmarks Reading List Drawer */}
       <BookmarksDrawer
         isOpen={isBookmarksOpen}
         onClose={() => setIsBookmarksOpen(false)}
@@ -486,7 +583,19 @@ export default function App() {
         onClearAll={handleClearAllBookmarks}
       />
 
-      {/* 8. Toast Feedback Message */}
+      {/* 9. Algorithm Tuning & Inspection Modal */}
+      <AlgorithmExplainerModal
+        isOpen={isAlgorithmModalOpen}
+        onClose={() => setIsAlgorithmModalOpen(false)}
+        weights={algorithmWeights}
+        onUpdateWeights={(newWeights) => {
+          setAlgorithmWeights(newWeights);
+          showToast('Algorithm weights updated');
+        }}
+        ui={ui}
+      />
+
+      {/* 10. Toast Feedback Message */}
       {toastMessage && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white border border-stone-700 px-4 py-2 text-xs font-mono shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
           <Check className="w-3.5 h-3.5 text-[#9A3412]" />

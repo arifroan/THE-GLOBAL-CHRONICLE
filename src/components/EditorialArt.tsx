@@ -288,6 +288,66 @@ export const EditorialArt: React.FC<EditorialArtProps> = ({
         </div>
       );
 
+    case 'entertainment':
+      return (
+        <div
+          className={`relative w-full overflow-hidden bg-gradient-to-br from-[#2E1065] via-[#1E1B4B] to-[#0F172A] text-white flex items-center justify-center p-6 ${aspectClass} ${className}`}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-40"
+            viewBox="0 0 800 450"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Cinema projector cone & cinematic film frame */}
+            <polygon points="120,225 720,80 720,370" fill="#C084FC" fillOpacity="0.12" />
+            <circle cx="120" cy="225" r="45" stroke="#C084FC" strokeWidth="1.5" />
+            <circle cx="120" cy="225" r="15" fill="#E879F9" fillOpacity="0.4" />
+            {/* Projector rays */}
+            <line x1="120" y1="225" x2="720" y2="80" stroke="#E879F9" strokeWidth="1" strokeDasharray="6 6" />
+            <line x1="120" y1="225" x2="720" y2="370" stroke="#E879F9" strokeWidth="1" strokeDasharray="6 6" />
+            {/* Film frame grid */}
+            <rect x="520" y="110" width="180" height="230" rx="4" stroke="#F472B6" strokeWidth="1.5" fill="none" />
+            {[140, 190, 240, 290].map((y, i) => (
+              <line key={i} x1="520" y1={y} x2="700" y2={y} stroke="#F472B6" strokeWidth="0.5" strokeDasharray="3 3" />
+            ))}
+          </svg>
+          <div className="relative z-10 flex flex-col justify-end w-full h-full text-left pointer-events-none">
+            <span className="text-[11px] tracking-widest uppercase font-mono text-purple-300">
+              International Arts & Cinema · Cannes & Venice Wire
+            </span>
+          </div>
+        </div>
+      );
+
+    case 'sports':
+      return (
+        <div
+          className={`relative w-full overflow-hidden bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#14532D] text-white flex items-center justify-center p-6 ${aspectClass} ${className}`}
+        >
+          <svg
+            className="absolute inset-0 w-full h-full opacity-40"
+            viewBox="0 0 800 450"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Athletic stadium oval running tracks */}
+            <ellipse cx="400" cy="225" rx="320" ry="150" stroke="#4ADE80" strokeWidth="1" />
+            <ellipse cx="400" cy="225" rx="270" ry="120" stroke="#4ADE80" strokeWidth="1" strokeDasharray="4 4" />
+            <ellipse cx="400" cy="225" rx="220" ry="90" stroke="#4ADE80" strokeWidth="1.5" />
+            <ellipse cx="400" cy="225" rx="170" ry="60" stroke="#4ADE80" strokeWidth="1" strokeDasharray="3 3" />
+            {/* Center line and pitch circle */}
+            <line x1="400" y1="135" x2="400" y2="315" stroke="white" strokeWidth="1.5" strokeOpacity="0.7" />
+            <circle cx="400" cy="225" r="30" stroke="white" strokeWidth="1" strokeOpacity="0.8" />
+          </svg>
+          <div className="relative z-10 flex flex-col justify-end w-full h-full text-left pointer-events-none">
+            <span className="text-[11px] tracking-widest uppercase font-mono text-emerald-300">
+              Global Championship Athletics · World Tour Dispatch
+            </span>
+          </div>
+        </div>
+      );
+
     case 'health':
     default:
       return (

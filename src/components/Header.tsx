@@ -17,6 +17,8 @@ interface HeaderProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onFocusSearch: () => void;
+  currentView: 'portal' | 'my-news';
+  onSelectView: (view: 'portal' | 'my-news') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,6 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
   darkMode,
   onToggleDarkMode,
   onFocusSearch,
+  currentView,
+  onSelectView,
 }) => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
@@ -40,6 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'politics', label: ui.categories.politics },
     { id: 'business', label: ui.categories.business },
     { id: 'tech', label: ui.categories.tech },
+    { id: 'sports', label: ui.categories.sports },
+    { id: 'entertainment', label: ui.categories.entertainment },
     { id: 'science', label: ui.categories.science },
     { id: 'climate', label: ui.categories.climate },
     { id: 'culture', label: ui.categories.culture },
@@ -64,7 +70,10 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between gap-8 h-16 border-b border-stone-100 dark:border-stone-800">
           {/* Zone 1: Single text wordmark */}
           <button
-            onClick={() => onSelectCategory('all')}
+            onClick={() => {
+              onSelectView('portal');
+              onSelectCategory('all');
+            }}
             className="text-left group cursor-pointer"
           >
             <span className="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-stone-950 dark:text-stone-50 whitespace-nowrap shrink-0 group-hover:text-[#9A3412] transition-colors">
@@ -73,46 +82,59 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Zone 2: 4-5 concise single-line nav links */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-stone-700 dark:text-stone-300">
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-stone-700 dark:text-stone-300">
             <button
-              onClick={() => onSelectCategory('world')}
+              onClick={() => {
+                onSelectView('portal');
+                onSelectCategory('all');
+              }}
               className={`hover:text-stone-950 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 hover:underline underline-offset-8 decoration-1 ${
-                activeCategory === 'world' ? 'text-[#9A3412] font-semibold underline' : ''
+                currentView === 'portal' && activeCategory === 'all' ? 'text-[#9A3412] font-semibold underline' : ''
               }`}
             >
-              {ui.categories.world}
+              {ui.categories.all}
             </button>
             <button
-              onClick={() => onSelectCategory('business')}
-              className={`hover:text-stone-950 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 hover:underline underline-offset-8 decoration-1 ${
-                activeCategory === 'business' ? 'text-[#9A3412] font-semibold underline' : ''
+              onClick={() => onSelectView('my-news')}
+              className={`hover:text-stone-950 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 hover:underline underline-offset-8 decoration-1 flex items-center gap-1.5 ${
+                currentView === 'my-news' ? 'text-[#9A3412] font-semibold underline' : ''
               }`}
             >
-              {ui.categories.business}
+              <span>{ui.myNews}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#9A3412]" />
             </button>
             <button
-              onClick={() => onSelectCategory('tech')}
+              onClick={() => {
+                onSelectView('portal');
+                onSelectCategory('tech');
+              }}
               className={`hover:text-stone-950 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 hover:underline underline-offset-8 decoration-1 ${
-                activeCategory === 'tech' ? 'text-[#9A3412] font-semibold underline' : ''
+                currentView === 'portal' && activeCategory === 'tech' ? 'text-[#9A3412] font-semibold underline' : ''
               }`}
             >
               {ui.categories.tech}
             </button>
             <button
-              onClick={() => onSelectCategory('climate')}
+              onClick={() => {
+                onSelectView('portal');
+                onSelectCategory('sports');
+              }}
               className={`hover:text-stone-950 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 hover:underline underline-offset-8 decoration-1 ${
-                activeCategory === 'climate' ? 'text-[#9A3412] font-semibold underline' : ''
+                currentView === 'portal' && activeCategory === 'sports' ? 'text-[#9A3412] font-semibold underline' : ''
               }`}
             >
-              {ui.categories.climate}
+              {ui.categories.sports}
             </button>
             <button
-              onClick={() => onSelectCategory('opinion')}
+              onClick={() => {
+                onSelectView('portal');
+                onSelectCategory('entertainment');
+              }}
               className={`hover:text-stone-950 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 hover:underline underline-offset-8 decoration-1 ${
-                activeCategory === 'opinion' ? 'text-[#9A3412] font-semibold underline' : ''
+                currentView === 'portal' && activeCategory === 'entertainment' ? 'text-[#9A3412] font-semibold underline' : ''
               }`}
             >
-              {ui.categories.opinion}
+              {ui.categories.entertainment}
             </button>
           </nav>
 
@@ -238,12 +260,25 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Category Broadsheet Navigation Rail */}
         <div className="flex items-center overflow-x-auto no-scrollbar gap-1 py-1 text-xs">
+          <button
+            onClick={() => onSelectView('my-news')}
+            className={`px-3 py-1.5 whitespace-nowrap shrink-0 transition-colors font-semibold border-b-2 flex items-center gap-1.5 ${
+              currentView === 'my-news'
+                ? 'border-[#9A3412] text-[#9A3412]'
+                : 'border-transparent text-[#9A3412] hover:text-[#7C2D12]'
+            }`}
+          >
+            <span>★ {ui.myNews}</span>
+          </button>
           {categories.map((cat) => {
-            const isActive = activeCategory === cat.id;
+            const isActive = currentView === 'portal' && activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
-                onClick={() => onSelectCategory(cat.id)}
+                onClick={() => {
+                  onSelectView('portal');
+                  onSelectCategory(cat.id);
+                }}
                 className={`px-3 py-1.5 whitespace-nowrap shrink-0 transition-colors font-medium border-b-2 ${
                   isActive
                     ? 'border-[#9A3412] text-[#9A3412] font-semibold'

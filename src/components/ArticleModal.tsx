@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Article, Language } from '../types/news';
 import { SUPPORTED_LANGUAGES, UIStrings } from '../data/languages';
 import { EditorialArt } from './EditorialArt';
+import { analyzeArticleSentiment } from '../utils/sentimentAnalysis';
 import {
   X,
   Volume2,
@@ -15,6 +16,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 
 interface ArticleModalProps {
@@ -75,6 +77,17 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
     SUPPORTED_LANGUAGES.find((l) => l.code === readingLanguage) || SUPPORTED_LANGUAGES[0];
 
   const isRTL = activeLangConfig.dir === 'rtl';
+
+  // Sentiment Lexicon Analysis
+  const sentiment = article.sentiment || analyzeArticleSentiment(article, readingLanguage);
+  const sentimentType = sentiment.type;
+  const sentimentScoreStr = sentiment.score > 0 ? `+${sentiment.score.toFixed(2)}` : sentiment.score.toFixed(2);
+  const sentimentLabel =
+    sentimentType === 'Positive'
+      ? ui.sentimentLabels?.positive || 'Positive'
+      : sentimentType === 'Negative'
+      ? ui.sentimentLabels?.negative || 'Negative'
+      : ui.sentimentLabels?.neutral || 'Neutral';
 
   // Speech handler using native Web Speech API
   const handleToggleSpeech = () => {
@@ -357,6 +370,30 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
             </span>
             <span>·</span>
             <span className="tabular-nums">{article.readTimeMinutes} {ui.minutes} {ui.readTime}</span>
+            <span>·</span>
+            {/* Sentiment Tag in Header */}
+            <span
+              className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[11px] font-mono font-medium ${
+                sentimentType === 'Positive'
+                  ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+                  : sentimentType === 'Negative'
+                  ? 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60'
+                  : 'text-stone-600 dark:text-stone-400 bg-stone-100 dark:bg-stone-800/50 border-stone-200 dark:border-stone-700'
+              }`}
+              title={`Lexicon Polarity: ${sentimentScoreStr}`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  sentimentType === 'Positive'
+                    ? 'bg-emerald-500'
+                    : sentimentType === 'Negative'
+                    ? 'bg-rose-500'
+                    : 'bg-stone-400 dark:bg-stone-500'
+                }`}
+              />
+              <span>{sentimentLabel}</span>
+              <span className="text-[10px] opacity-75 tabular-nums">({sentimentScoreStr})</span>
+            </span>
             {article.isFactChecked && (
               <>
                 <span>·</span>
@@ -379,7 +416,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
           </p>
 
           {/* Byline Strip */}
-          <div className="flex items-center justify-between mb-8 text-xs text-stone-600 dark:text-stone-400 border-b border-stone-100 dark:border-stone-800/80 pb-4">
+          <div className="flex items-center justify-between mb-6 text-xs text-stone-600 dark:text-stone-400 border-b border-stone-100 dark:border-stone-800/80 pb-4">
             <div>
               <span className="font-semibold text-stone-900 dark:text-stone-200">
                 By {article.author}
@@ -388,6 +425,50 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
             </div>
             <div className="font-mono text-[11px] text-stone-400">
               {article.views.toLocaleString()} {ui.views} · {article.shares.toLocaleString()} {ui.shares}
+            </div>
+          </div>
+
+          {/* Sentiment Lexicon Analysis Box */}
+          <div className="mb-8 p-4 bg-stone-50 dark:bg-stone-950/70 border border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+            <div className="flex items-center gap-2.5">
+              <span className="text-stone-500 dark:text-stone-400 uppercase tracking-wider text-[11px] font-semibold">
+                Lexicon Tone Analysis:
+              </span>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-bold border ${
+                  sentimentType === 'Positive'
+                    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800'
+                    : sentimentType === 'Negative'
+                    ? 'text-rose-700 dark:text-rose-400 bg-rose-100/60 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800'
+                    : 'text-stone-700 dark:text-stone-300 bg-stone-200/60 dark:bg-stone-800/60 border-stone-300 dark:border-stone-700'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    sentimentType === 'Positive'
+                      ? 'bg-emerald-500'
+                      : sentimentType === 'Negative'
+                      ? 'bg-rose-500'
+                      : 'bg-stone-400 dark:bg-stone-500'
+                  }`}
+                />
+                <span>{sentimentType}</span>
+                <span className="opacity-80 tabular-nums">({sentimentScoreStr})</span>
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-[11px] text-stone-500 dark:text-stone-400">
+              <span>Positives: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{sentiment.positiveCount}</strong></span>
+              <span>·</span>
+              <span>Negatives: <strong className="text-rose-600 dark:text-rose-400 font-bold">{sentiment.negativeCount}</strong></span>
+              {sentiment.highlightWords && sentiment.highlightWords.length > 0 && (
+                <>
+                  <span>·</span>
+                  <span>
+                    Lexicon Match: <strong className="italic text-stone-800 dark:text-stone-200">{sentiment.highlightWords.join(', ')}</strong>
+                  </span>
+                </>
+              )}
             </div>
           </div>
 

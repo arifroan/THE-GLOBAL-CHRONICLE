@@ -3,6 +3,7 @@ import { Article, Language } from '../types/news';
 import { UIStrings } from '../data/languages';
 import { EditorialArt } from './EditorialArt';
 import { Bookmark, Share2, Volume2, CheckCircle2 } from 'lucide-react';
+import { analyzeArticleSentiment } from '../utils/sentimentAnalysis';
 
 interface EditorialCardProps {
   article: Article;
@@ -37,6 +38,32 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
     day: 'numeric',
   });
 
+  // Sentiment Lexicon Analysis
+  const sentiment = article.sentiment || analyzeArticleSentiment(article, currentLanguage);
+  const sentimentType = sentiment.type;
+  const sentimentScore = sentiment.score;
+  const sentimentScoreFormatted = sentimentScore > 0 ? `+${sentimentScore.toFixed(2)}` : sentimentScore.toFixed(2);
+  const sentimentText =
+    sentimentType === 'Positive'
+      ? ui.sentimentLabels?.positive || 'Positive'
+      : sentimentType === 'Negative'
+      ? ui.sentimentLabels?.negative || 'Negative'
+      : ui.sentimentLabels?.neutral || 'Neutral';
+
+  const sentimentBadgeClasses =
+    sentimentType === 'Positive'
+      ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+      : sentimentType === 'Negative'
+      ? 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60'
+      : 'text-stone-600 dark:text-stone-400 bg-stone-100 dark:bg-stone-800/50 border-stone-200 dark:border-stone-700';
+
+  const sentimentDotColor =
+    sentimentType === 'Positive'
+      ? 'bg-emerald-500'
+      : sentimentType === 'Negative'
+      ? 'bg-rose-500'
+      : 'bg-stone-400 dark:bg-stone-500';
+
   if (variant === 'lead') {
     return (
       <article
@@ -60,6 +87,16 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
                 <span className="tabular-nums">{dateFormatted}</span>
                 <span aria-hidden="true">·</span>
                 <span className="tabular-nums">{article.readTimeMinutes} {ui.minutes}</span>
+                <span aria-hidden="true">·</span>
+                {/* Sentiment Tag */}
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[11px] font-mono font-medium ${sentimentBadgeClasses}`}
+                  title={`Lexicon Tone: ${sentimentType} (${sentimentScoreFormatted})${sentiment.highlightWords?.length ? ` · Keywords: ${sentiment.highlightWords.join(', ')}` : ''}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${sentimentDotColor}`} />
+                  <span>{sentimentText}</span>
+                  <span className="text-[10px] opacity-75 tabular-nums">({sentimentScoreFormatted})</span>
+                </span>
                 {article.isFactChecked && (
                   <>
                     <span aria-hidden="true">·</span>
@@ -194,6 +231,20 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
             <span>{article.city}</span>
             <span>·</span>
             <span className="tabular-nums">{dateFormatted}</span>
+            <span>·</span>
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] font-mono font-medium ${
+                sentimentType === 'Positive'
+                  ? 'text-emerald-700 dark:text-emerald-400'
+                  : sentimentType === 'Negative'
+                  ? 'text-rose-700 dark:text-rose-400'
+                  : 'text-stone-500 dark:text-stone-400'
+              }`}
+              title={`Tone: ${sentimentType} (${sentimentScoreFormatted})`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${sentimentDotColor}`} />
+              <span>{sentimentText}</span>
+            </span>
           </div>
           <h4 className="font-editorial text-sm font-semibold text-stone-900 dark:text-stone-100 group-hover:text-[#9A3412] transition-colors line-clamp-2">
             {translation.title}
@@ -238,6 +289,15 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
             <span className="tabular-nums">{dateFormatted}</span>
             <span>·</span>
             <span className="tabular-nums">{article.readTimeMinutes} {ui.minutes}</span>
+            <span>·</span>
+            {/* Sentiment Tag */}
+            <span
+              className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[10.5px] font-mono font-medium ${sentimentBadgeClasses}`}
+              title={`Lexicon Tone: ${sentimentType} (${sentimentScoreFormatted})${sentiment.highlightWords?.length ? ` · Keywords: ${sentiment.highlightWords.join(', ')}` : ''}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${sentimentDotColor}`} />
+              <span>{sentimentText}</span>
+            </span>
           </div>
 
           <h3 className="font-editorial text-lg sm:text-xl font-bold text-stone-950 dark:text-stone-100 leading-snug mb-2 group-hover:text-[#9A3412] transition-colors line-clamp-3">

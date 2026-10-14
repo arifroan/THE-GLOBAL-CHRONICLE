@@ -28,6 +28,7 @@ export type NewsCategory =
   | 'science'
   | 'climate'
   | 'culture'
+  | 'entertainment'
   | 'sports'
   | 'health'
   | 'opinion';
@@ -53,13 +54,24 @@ export interface ArticleTranslation {
   };
 }
 
+export type SentimentType = 'Positive' | 'Neutral' | 'Negative';
+
+export interface ArticleSentiment {
+  type: SentimentType;
+  score: number; // -1.0 to +1.0
+  positiveCount: number;
+  negativeCount: number;
+  highlightWords: string[];
+}
+
 export interface Article {
   id: string;
   category: NewsCategory;
   region: Region;
   country: string;
   city: string;
-  source: string; // e.g. "Reuters", "Associated Press", "AFP", "BBC", "Kyodo News"
+  source: string; // e.g. "Reuters", "Associated Press", "AFP", "BBC News", "Bloomberg", etc.
+  sourceAuthority: number; // 0-100 rating based on verification standards and wire tier
   author: string;
   authorRole: string;
   timestamp: string; // ISO string
@@ -72,6 +84,7 @@ export interface Article {
     | 'climate'
     | 'science'
     | 'culture'
+    | 'entertainment'
     | 'sports'
     | 'health'
     | 'space'
@@ -80,8 +93,37 @@ export interface Article {
   isFactChecked: boolean;
   shares: number;
   views: number;
+  commentsCount?: number;
+  bookmarksCount?: number;
   translations: Record<Language, ArticleTranslation>;
   tags: string[];
+  sentiment?: ArticleSentiment;
+}
+
+export interface RankingScoreBreakdown {
+  recencyScore: number; // 0 - 100
+  authorityScore: number; // 0 - 100
+  engagementScore: number; // 0 - 100
+  totalScore: number; // 0 - 100
+  rank?: number;
+  hoursAgo: number;
+}
+
+export interface RankedArticle extends Article {
+  ranking: RankingScoreBreakdown;
+}
+
+export interface AlgorithmWeights {
+  recency: number; // default 0.35
+  authority: number; // default 0.35
+  engagement: number; // default 0.30
+}
+
+export interface UserFeedConfig {
+  selectedCategories: NewsCategory[];
+  selectedSources: string[];
+  keywordFilter: string;
+  minScore: number;
 }
 
 export interface MarketItem {
@@ -102,3 +144,4 @@ export interface BureauClock {
   tempC: number;
   marketOpen: boolean;
 }
+
