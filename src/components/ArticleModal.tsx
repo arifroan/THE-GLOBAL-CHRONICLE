@@ -226,14 +226,14 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               </div>
             </div>
 
-            {/* Font Size Adjuster */}
-            <div className="hidden sm:flex items-center border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900">
+            {/* Font Size Adjuster (Accessible on all devices including mobile) */}
+            <div className="flex items-center border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-xs">
               <button
                 onClick={() => setFontSize('normal')}
-                className={`px-2 py-1 text-xs font-mono ${
+                className={`px-1.5 sm:px-2 py-1 text-[11px] sm:text-xs font-mono transition-colors ${
                   fontSize === 'normal'
-                    ? 'bg-stone-200 dark:bg-stone-700 font-bold'
-                    : 'text-stone-600 dark:text-stone-400'
+                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                 }`}
                 title="Default Font Size"
               >
@@ -241,10 +241,10 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               </button>
               <button
                 onClick={() => setFontSize('large')}
-                className={`px-2 py-1 text-sm font-mono border-l border-stone-300 dark:border-stone-700 ${
+                className={`px-1.5 sm:px-2 py-1 text-xs sm:text-sm font-mono border-l border-stone-300 dark:border-stone-700 transition-colors ${
                   fontSize === 'large'
-                    ? 'bg-stone-200 dark:bg-stone-700 font-bold'
-                    : 'text-stone-600 dark:text-stone-400'
+                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                 }`}
                 title="Large Font Size"
               >
@@ -252,10 +252,10 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               </button>
               <button
                 onClick={() => setFontSize('xlarge')}
-                className={`px-2 py-1 text-base font-mono border-l border-stone-300 dark:border-stone-700 ${
+                className={`px-1.5 sm:px-2 py-1 text-xs sm:text-base font-mono border-l border-stone-300 dark:border-stone-700 transition-colors ${
                   fontSize === 'xlarge'
-                    ? 'bg-stone-200 dark:bg-stone-700 font-bold'
-                    : 'text-stone-600 dark:text-stone-400'
+                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                 }`}
                 title="Broadsheet Font Size"
               >

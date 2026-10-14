@@ -1,5 +1,5 @@
 {
-  "name": "The Global Chronicle",
+  "name": "THE GLOBAL CHRONICLES",
   "description": "Comprehensive global news portal covering world affairs, geopolitics, markets, science, culture, and technology with multi-region dispatches and multilingual reading in 10 languages.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

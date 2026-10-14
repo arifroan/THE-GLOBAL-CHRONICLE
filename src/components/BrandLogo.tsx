@@ -158,28 +158,43 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   if (variant === 'emblem-only') {
     return (
-      <div className={`inline-flex items-center justify-center ${className}`}>
-        <Emblem size={38} />
+      <div className={`inline-flex items-center justify-center shrink-0 ${className}`}>
+        <Emblem size={34} />
       </div>
     );
   }
 
   if (variant === 'masthead') {
     return (
-      <div className={`flex flex-col items-center text-center py-4 ${className}`}>
-        <div className="flex items-center justify-center gap-4 mb-2">
-          <div className="hidden sm:block h-[1px] w-16 md:w-24 bg-stone-300 dark:bg-stone-700" />
-          <Emblem size={52} />
-          <div className="hidden sm:block h-[1px] w-16 md:w-24 bg-stone-300 dark:bg-stone-700" />
+      <div className={`flex flex-col items-center text-center py-4 sm:py-6 px-2 ${className}`}>
+        {/* Classical broadsheet ornament rule with heraldic emblem */}
+        <div className="flex items-center justify-center gap-3 sm:gap-6 mb-3 sm:mb-4 w-full max-w-2xl">
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-stone-300 dark:via-stone-700 to-stone-400 dark:to-stone-600" />
+          <div className="p-1 rounded-full border border-stone-200 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 shadow-xs">
+            <div className="sm:hidden">
+              <Emblem size={42} />
+            </div>
+            <div className="hidden sm:block md:hidden">
+              <Emblem size={52} />
+            </div>
+            <div className="hidden md:block">
+              <Emblem size={64} />
+            </div>
+          </div>
+          <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-stone-300 dark:via-stone-700 to-stone-400 dark:to-stone-600" />
         </div>
-        <h1 className="font-editorial text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-stone-950 dark:text-stone-50 uppercase leading-none">
+
+        {/* Grand masthead title */}
+        <h1 className="font-editorial text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-stone-950 dark:text-stone-50 uppercase leading-none px-2 select-none">
           THE GLOBAL CHRONICLES
         </h1>
-        <div className="flex items-center justify-center gap-3 mt-2 text-[11px] font-mono tracking-widest uppercase text-stone-600 dark:text-stone-400">
-          <span>Veritas</span>
-          <span className="text-[#9A3412]">·</span>
+
+        {/* Broadsheet sub-ribbon motto */}
+        <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-4 mt-2 sm:mt-3 text-[10px] sm:text-xs font-mono tracking-widest uppercase text-stone-600 dark:text-stone-400">
+          <span>Veritas et Sapientia</span>
+          <span className="text-[#9A3412] font-bold">·</span>
           <span>International Dispatches</span>
-          <span className="text-[#9A3412]">·</span>
+          <span className="text-[#9A3412] font-bold">·</span>
           <span>Est. 2026</span>
         </div>
       </div>
@@ -188,13 +203,13 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   if (variant === 'footer') {
     return (
-      <div className={`flex items-center gap-3.5 ${className}`}>
+      <div className={`flex items-center gap-3 sm:gap-4 ${className}`}>
         <Emblem size={44} isDark={true} />
         <div className="flex flex-col">
-          <span className="font-editorial text-xl sm:text-2xl font-bold tracking-tight text-white uppercase leading-tight">
+          <span className="font-editorial text-lg sm:text-2xl font-bold tracking-tight text-white uppercase leading-tight">
             THE GLOBAL CHRONICLES
           </span>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#9A3412]">
+          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-[#9A3412]">
             Independent International Journalism · Worldwide Wire
           </span>
         </div>
@@ -204,13 +219,13 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   if (variant === 'digest') {
     return (
-      <div className={`flex items-center gap-3 ${className}`}>
-        <Emblem size={38} />
+      <div className={`flex items-center gap-2.5 sm:gap-3.5 ${className}`}>
+        <Emblem size={36} />
         <div className="flex flex-col text-left">
-          <span className="font-editorial text-lg sm:text-xl font-bold tracking-tight text-stone-950 dark:text-stone-50 uppercase leading-tight">
+          <span className="font-editorial text-base sm:text-xl font-bold tracking-tight text-stone-950 dark:text-stone-50 uppercase leading-tight">
             THE GLOBAL CHRONICLES
           </span>
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#9A3412]">
+          <span className="text-[9.5px] sm:text-[10px] font-mono uppercase tracking-wider text-[#9A3412]">
             Global Daily Digest · Morning & Evening Edition
           </span>
         </div>
@@ -218,17 +233,19 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     );
   }
 
-  // Default: Header variant
+  // Default: Header compact navbar variant
   return (
     <div className={`flex items-center gap-2 sm:gap-3 ${className}`}>
-      <div className="hidden xs:block">
-        <Emblem size={34} />
-      </div>
-      <div className="xs:hidden">
-        <Emblem size={28} />
+      <div className="shrink-0">
+        <div className="sm:hidden">
+          <Emblem size={28} />
+        </div>
+        <div className="hidden sm:block">
+          <Emblem size={34} />
+        </div>
       </div>
       <div className="flex flex-col text-left min-w-0">
-        <span className="font-editorial text-base sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-stone-950 dark:text-stone-50 whitespace-nowrap leading-none group-hover:text-[#9A3412] transition-colors truncate">
+        <span className="font-editorial text-sm sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight text-stone-950 dark:text-stone-50 leading-tight group-hover:text-[#9A3412] transition-colors whitespace-nowrap">
           THE GLOBAL CHRONICLES
         </span>
         {showTagline && (

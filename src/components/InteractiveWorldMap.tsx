@@ -49,7 +49,7 @@ export const InteractiveWorldMap: React.FC<InteractiveWorldMapProps> = ({
         </div>
       </div>
 
-      <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] bg-[#F7F4EE] dark:bg-stone-950 overflow-hidden border border-stone-200/60 dark:border-stone-800 flex items-center justify-center">
+      <div className="relative w-full min-h-[190px] aspect-[16/9] sm:aspect-[24/9] bg-[#F7F4EE] dark:bg-stone-950 overflow-hidden border border-stone-200/60 dark:border-stone-800 flex items-center justify-center">
         {/* World map stylized continents vector */}
         <svg
           viewBox="0 0 900 380"

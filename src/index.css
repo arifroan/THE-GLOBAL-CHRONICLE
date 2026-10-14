@@ -40,3 +40,48 @@
 .text-balance {
   text-wrap: balance;
 }
+
+/* Reader Font Size Global Adjustments */
+.reader-size-large {
+  font-size: 1.0625rem;
+}
+
+.reader-size-large h1 {
+  font-size: 1.1em;
+}
+
+.reader-size-large h2 {
+  font-size: 1.12em;
+}
+
+.reader-size-large h3,
+.reader-size-large h4 {
+  font-size: 1.1em;
+}
+
+.reader-size-large p {
+  font-size: 1.08em;
+  line-height: 1.75;
+}
+
+.reader-size-xlarge {
+  font-size: 1.15rem;
+}
+
+.reader-size-xlarge h1 {
+  font-size: 1.2em;
+}
+
+.reader-size-xlarge h2 {
+  font-size: 1.25em;
+}
+
+.reader-size-xlarge h3,
+.reader-size-xlarge h4 {
+  font-size: 1.2em;
+}
+
+.reader-size-xlarge p {
+  font-size: 1.18em;
+  line-height: 1.85;
+}

@@ -24,6 +24,7 @@ import { AlgorithmExplainerModal } from './components/AlgorithmExplainerModal';
 import { GlobalDailyDigest } from './components/GlobalDailyDigest';
 import { Footer } from './components/Footer';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { BrandLogo } from './components/BrandLogo';
 import { Sparkles, Compass, Newspaper, Check } from 'lucide-react';
 
 export default function App() {
@@ -50,6 +51,23 @@ export default function App() {
   const [activeRegion, setActiveRegion] = useState<Region>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'latest' | 'breaking' | 'mostRead'>('latest');
+
+  // Global Reader Text Size state ('normal' | 'large' | 'xlarge')
+  const [readerSize, setReaderSize] = useState<'normal' | 'large' | 'xlarge'>(() => {
+    try {
+      const saved = localStorage.getItem('global_chronicle_reader_size');
+      if (saved === 'large' || saved === 'xlarge') return saved;
+      return 'normal';
+    } catch {
+      return 'normal';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('global_chronicle_reader_size', readerSize);
+    } catch {}
+  }, [readerSize]);
 
   // Algorithm weights state
   const [algorithmWeights, setAlgorithmWeights] = useState<AlgorithmWeights>(() => {
@@ -292,76 +310,92 @@ export default function App() {
     (a) => a.id !== leadStory?.id && !secondaryStories.some((s) => s.id === a.id)
   );
 
-  return (
-    <div
-      className="min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors pb-16 md:pb-0"
-      dir={currentLangConfig.dir}
-    >
-      {/* 1. Live Bureau Clocks & Market Ticker */}
-      <BureauClockBar bureaus={WORLD_BUREAUS} markets={INITIAL_MARKET_DATA} ui={ui} />
+    const readerClass =
+      readerSize === 'xlarge'
+        ? 'reader-size-xlarge'
+        : readerSize === 'large'
+        ? 'reader-size-large'
+        : 'reader-size-normal';
 
-      {/* 2. Breaking News Urgent Alert Banner */}
-      <BreakingTicker
-        articles={WORLD_ARTICLES}
-        currentLanguage={currentLanguage}
-        ui={ui}
-        onSelectArticle={(art) => setSelectedArticle(art)}
-      />
+    return (
+      <div
+        className={`min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors pb-16 md:pb-0 overflow-x-hidden ${readerClass}`}
+        dir={currentLangConfig.dir}
+      >
+        {/* 1. Live Bureau Clocks & Market Ticker */}
+        <BureauClockBar bureaus={WORLD_BUREAUS} markets={INITIAL_MARKET_DATA} ui={ui} />
 
-      {/* 3. Header strictly complying with Top Bar Contract */}
-      <Header
-        currentLanguage={currentLanguage}
-        onSelectLanguage={(lang) => setCurrentLanguage(lang)}
-        activeCategory={activeCategory}
-        onSelectCategory={(cat) => {
-          setActiveCategory(cat);
-          setCurrentView('portal');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        activeRegion={activeRegion}
-        onSelectRegion={(reg) => {
-          setActiveRegion(reg);
-          setCurrentView('portal');
-        }}
-        ui={ui}
-        savedCount={savedIds.length}
-        onOpenSaved={() => setIsBookmarksOpen(true)}
-        onOpenAudioBriefing={() => setIsAudioBriefingOpen(true)}
-        onScrollToDigest={handleScrollToDigest}
-        darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode((prev) => !prev)}
-        onFocusSearch={() => {
-          setCurrentView('portal');
-          setFocusSearchTrigger((prev) => prev + 1);
-        }}
-        currentView={currentView}
-        onSelectView={(view) => {
-          setCurrentView(view);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+        {/* 2. Breaking News Urgent Alert Banner */}
+        <BreakingTicker
+          articles={WORLD_ARTICLES}
+          currentLanguage={currentLanguage}
+          ui={ui}
+          onSelectArticle={(art) => setSelectedArticle(art)}
+        />
 
-      {/* 4. Main Arena */}
-      {currentView === 'my-news' ? (
-        /* Dedicated 'My News' Customizable Feed Page */
-        <main className="flex-1 w-full py-4">
-          <MyNewsPage
-            articles={WORLD_ARTICLES}
-            currentLanguage={currentLanguage}
-            ui={ui}
-            feedConfig={userFeedConfig}
-            onUpdateFeedConfig={handleUpdateFeedConfig}
-            onSelectArticle={(art) => setSelectedArticle(art)}
-            savedIds={savedIds}
-            onToggleSave={handleToggleSave}
-            onShare={handleShare}
-          />
-        </main>
-      ) : (
-        /* Main Global Chronicle Broadsheet Portal */
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full py-8">
-          {/* Search, Region & Sort Toolbar */}
-          <SearchFilterBar
+        {/* 3. Header strictly complying with Top Bar Contract */}
+        <Header
+          currentLanguage={currentLanguage}
+          onSelectLanguage={(lang) => setCurrentLanguage(lang)}
+          activeCategory={activeCategory}
+          onSelectCategory={(cat) => {
+            setActiveCategory(cat);
+            setCurrentView('portal');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          activeRegion={activeRegion}
+          onSelectRegion={(reg) => {
+            setActiveRegion(reg);
+            setCurrentView('portal');
+          }}
+          ui={ui}
+          savedCount={savedIds.length}
+          onOpenSaved={() => setIsBookmarksOpen(true)}
+          onOpenAudioBriefing={() => setIsAudioBriefingOpen(true)}
+          onScrollToDigest={handleScrollToDigest}
+          darkMode={darkMode}
+          onToggleDarkMode={() => setDarkMode((prev) => !prev)}
+          onFocusSearch={() => {
+            setCurrentView('portal');
+            setFocusSearchTrigger((prev) => prev + 1);
+          }}
+          currentView={currentView}
+          onSelectView={(view) => {
+            setCurrentView(view);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          readerSize={readerSize}
+          onSelectReaderSize={setReaderSize}
+        />
+
+        {/* 4. Main Arena */}
+        {currentView === 'my-news' ? (
+          /* Dedicated 'My News' Customizable Feed Page */
+          <main className="flex-1 w-full py-4">
+            <MyNewsPage
+              articles={WORLD_ARTICLES}
+              currentLanguage={currentLanguage}
+              ui={ui}
+              feedConfig={userFeedConfig}
+              onUpdateFeedConfig={handleUpdateFeedConfig}
+              onSelectArticle={(art) => setSelectedArticle(art)}
+              savedIds={savedIds}
+              onToggleSave={handleToggleSave}
+              onShare={handleShare}
+            />
+          </main>
+        ) : (
+          /* Main Global Chronicle Broadsheet Portal */
+          <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full py-4 sm:py-8">
+            {/* Authentic Broadsheet Grand Masthead with Heraldic Insignia & Latin Motto */}
+            {!isFiltered && (
+              <div className="mb-6 sm:mb-8 pb-3 sm:pb-4 border-b-2 border-stone-900 dark:border-stone-100">
+                <BrandLogo variant="masthead" />
+              </div>
+            )}
+
+            {/* Search, Region & Sort Toolbar */}
+            <SearchFilterBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             activeRegion={activeRegion}

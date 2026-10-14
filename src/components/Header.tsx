@@ -21,6 +21,8 @@ interface HeaderProps {
   onFocusSearch: () => void;
   currentView: 'portal' | 'my-news';
   onSelectView: (view: 'portal' | 'my-news') => void;
+  readerSize?: 'normal' | 'large' | 'xlarge';
+  onSelectReaderSize?: (size: 'normal' | 'large' | 'xlarge') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,6 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
   onFocusSearch,
   currentView,
   onSelectView,
+  readerSize = 'normal',
+  onSelectReaderSize,
 }) => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -71,21 +75,21 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 transition-colors sticky top-0 z-40">
       {/* Editorial Top Bar strictly complying with 3-zone contract */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between gap-8 h-16 border-b border-stone-100 dark:border-stone-800">
+        <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-6 h-16 border-b border-stone-100 dark:border-stone-800">
           {/* Zone 1: Masthead Brand Logo with Heraldic Seal */}
           <button
             onClick={() => {
               onSelectView('portal');
               onSelectCategory('all');
             }}
-            className="text-left group cursor-pointer"
+            className="text-left group cursor-pointer shrink min-w-0"
             aria-label="THE GLOBAL CHRONICLES Home"
           >
             <BrandLogo variant="header" showTagline={true} />
           </button>
 
           {/* Zone 2: 4-5 concise single-line nav links */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-stone-700 dark:text-stone-300">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-sm font-medium text-stone-700 dark:text-stone-300">
             <button
               onClick={() => {
                 onSelectView('portal');
@@ -141,9 +145,8 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Zone 3: 1 Primary Action Area with Language Switcher & Utilities */}
           {/* Zone 3: Primary Action Area with Language Switcher & Utilities */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-2.5 shrink-0">
             {/* Search trigger */}
             <button
               onClick={onFocusSearch}
@@ -158,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
             {onScrollToDigest && (
               <button
                 onClick={onScrollToDigest}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors whitespace-nowrap shrink-0"
+                className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono font-medium text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors whitespace-nowrap shrink-0"
                 title="Global Daily Digest"
               >
                 <Mail className="w-3.5 h-3.5 text-[#9A3412]" />
@@ -169,12 +172,55 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Audio bulletin button */}
             <button
               onClick={onOpenAudioBriefing}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors whitespace-nowrap shrink-0"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono font-medium text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors whitespace-nowrap shrink-0"
               title={ui.audioBriefingTitle}
             >
               <Radio className="w-3.5 h-3.5 text-[#9A3412]" />
-              <span>{ui.listenBriefing}</span>
+              <span className="hidden md:inline">{ui.listenBriefing}</span>
+              <span className="md:hidden">Audio</span>
             </button>
+
+            {/* Desktop Reader Text Size Adjuster */}
+            {onSelectReaderSize && (
+              <div
+                className="hidden md:flex items-center border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-950 text-xs font-mono"
+                title="Reader Text Size"
+              >
+                <button
+                  onClick={() => onSelectReaderSize('normal')}
+                  className={`px-2 py-1 text-xs transition-colors ${
+                    readerSize === 'normal'
+                      ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+                  }`}
+                  title="Standard Text Size"
+                >
+                  A
+                </button>
+                <button
+                  onClick={() => onSelectReaderSize('large')}
+                  className={`px-2 py-1 text-xs border-l border-stone-200 dark:border-stone-700 transition-colors ${
+                    readerSize === 'large'
+                      ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+                  }`}
+                  title="Comfortable Text Size"
+                >
+                  A+
+                </button>
+                <button
+                  onClick={() => onSelectReaderSize('xlarge')}
+                  className={`px-2 py-1 text-xs border-l border-stone-200 dark:border-stone-700 transition-colors ${
+                    readerSize === 'xlarge'
+                      ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+                  }`}
+                  title="Large Text Size"
+                >
+                  A++
+                </button>
+              </div>
+            )}
 
             {/* Reading list button */}
             <button
@@ -201,8 +247,8 @@ export const Header: React.FC<HeaderProps> = ({
               {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-stone-700 dark:text-stone-300" />}
             </button>
 
-            {/* Multilingual Selector Popover */}
-            <div className="relative">
+            {/* Multilingual Selector Popover (hidden on mobile, in drawer) */}
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setIsLangDropdownOpen((prev) => !prev)}
                 className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white bg-stone-900 dark:bg-stone-100 dark:text-stone-900 rounded-none hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors whitespace-nowrap shrink-0"
@@ -210,8 +256,8 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-haspopup="listbox"
               >
                 <Globe className="w-3.5 h-3.5" />
-                <span className="font-semibold hidden sm:inline">{currentLangConfig.localName}</span>
-                <span className="font-semibold sm:hidden uppercase text-[11px]">{currentLangConfig.code}</span>
+                <span className="font-semibold hidden md:inline">{currentLangConfig.localName}</span>
+                <span className="font-semibold md:hidden uppercase text-[11px]">{currentLangConfig.code}</span>
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </button>
 
@@ -384,6 +430,53 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="truncate">{ui.listenBriefing}</span>
               </button>
             </div>
+
+            {/* Reader Text Size Adjuster for Mobile */}
+            {onSelectReaderSize && (
+              <div className="bg-stone-50 dark:bg-stone-950 p-3 border border-stone-200 dark:border-stone-800">
+                <div className="flex items-center justify-between text-[11px] font-mono text-stone-500 uppercase tracking-wider mb-2">
+                  <span>{ui.fontSize || 'Text Readability Size'}</span>
+                  <span className="font-semibold text-[#9A3412]">
+                    {readerSize === 'xlarge' ? 'A++ (Large)' : readerSize === 'large' ? 'A+ (Comfortable)' : 'A (Standard)'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+                  <button
+                    type="button"
+                    onClick={() => onSelectReaderSize('normal')}
+                    className={`py-2 text-center border font-medium transition-colors ${
+                      readerSize === 'normal'
+                        ? 'border-[#9A3412] bg-[#9A3412]/10 text-[#9A3412] font-bold'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300'
+                    }`}
+                  >
+                    A (Standard)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSelectReaderSize('large')}
+                    className={`py-2 text-center border font-medium transition-colors ${
+                      readerSize === 'large'
+                        ? 'border-[#9A3412] bg-[#9A3412]/10 text-[#9A3412] font-bold'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300'
+                    }`}
+                  >
+                    A+ (Medium)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSelectReaderSize('xlarge')}
+                    className={`py-2 text-center border font-medium transition-colors ${
+                      readerSize === 'xlarge'
+                        ? 'border-[#9A3412] bg-[#9A3412]/10 text-[#9A3412] font-bold'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300'
+                    }`}
+                  >
+                    A++ (Large)
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Language Switcher in Mobile Drawer */}
             <div>
