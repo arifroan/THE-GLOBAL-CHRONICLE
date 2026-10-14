@@ -1,0 +1,498 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { Article, Language, NewsCategory, Region } from './types/news';
+import { SUPPORTED_LANGUAGES, UI_TRANSLATIONS } from './data/languages';
+import { WORLD_ARTICLES } from './data/mockArticles';
+import { INITIAL_MARKET_DATA, WORLD_BUREAUS } from './data/marketAndClocks';
+import { Header } from './components/Header';
+import { BureauClockBar } from './components/BureauClockBar';
+import { BreakingTicker } from './components/BreakingTicker';
+import { InteractiveWorldMap } from './components/InteractiveWorldMap';
+import { SearchFilterBar } from './components/SearchFilterBar';
+import { EditorialCard } from './components/EditorialCard';
+import { ArticleModal } from './components/ArticleModal';
+import { AudioBriefingModal } from './components/AudioBriefingModal';
+import { BookmarksDrawer } from './components/BookmarksDrawer';
+import { Footer } from './components/Footer';
+import { Sparkles, Compass, Newspaper, Check } from 'lucide-react';
+
+export default function App() {
+  // Persistence for language & theme
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem('global_chronicle_lang');
+    return (saved as Language) || 'en';
+  });
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('global_chronicle_theme') === 'dark';
+  });
+
+  const [activeCategory, setActiveCategory] = useState<NewsCategory>('all');
+  const [activeRegion, setActiveRegion] = useState<Region>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'latest' | 'breaking' | 'mostRead'>('latest');
+
+  // Modals and drawers
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+  const [isAudioBriefingOpen, setIsAudioBriefingOpen] = useState(false);
+  const [focusSearchTrigger, setFocusSearchTrigger] = useState(0);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Saved articles in local storage
+  const [savedIds, setSavedIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('global_chronicle_bookmarks');
+      return saved ? JSON.parse(saved) : ['world-summit-treaty-2026'];
+    } catch {
+      return ['world-summit-treaty-2026'];
+    }
+  });
+
+  // Sync language with localStorage and document title
+  const currentLangConfig = useMemo(() => {
+    return SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
+  }, [currentLanguage]);
+
+  const ui = useMemo(() => {
+    return UI_TRANSLATIONS[currentLanguage] || UI_TRANSLATIONS.en;
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    localStorage.setItem('global_chronicle_lang', currentLanguage);
+    document.documentElement.lang = currentLanguage;
+    document.documentElement.dir = currentLangConfig.dir;
+  }, [currentLanguage, currentLangConfig]);
+
+  // Sync dark mode class
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('global_chronicle_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('global_chronicle_theme', 'light');
+    }
+  }, [darkMode]);
+
+  // Sync saved bookmarks with localStorage
+  useEffect(() => {
+    localStorage.setItem('global_chronicle_bookmarks', JSON.stringify(savedIds));
+  }, [savedIds]);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2800);
+  };
+
+  const handleToggleSave = (article: Article, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSavedIds((prev) => {
+      const exists = prev.includes(article.id);
+      if (exists) {
+        showToast('Removed from reading list');
+        return prev.filter((id) => id !== article.id);
+      } else {
+        showToast('Saved to your reading list');
+        return [...prev, article.id];
+      }
+    });
+  };
+
+  const handleRemoveBookmark = (id: string) => {
+    setSavedIds((prev) => prev.filter((item) => item !== id));
+    showToast('Removed from reading list');
+  };
+
+  const handleClearAllBookmarks = () => {
+    setSavedIds([]);
+    showToast('Reading list cleared');
+  };
+
+  const handleShare = (article: Article, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      showToast(ui.copiedLink);
+    }
+  };
+
+  const handleQuickListen = (article: Article, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedArticle(article);
+  };
+
+  // Article count by region for map
+  const articleCountsByRegion = useMemo(() => {
+    const counts: Record<Region, number> = {
+      all: WORLD_ARTICLES.length,
+      europe: 0,
+      'asia-pacific': 0,
+      'north-america': 0,
+      'latin-america': 0,
+      'middle-east': 0,
+      africa: 0,
+    };
+    WORLD_ARTICLES.forEach((a) => {
+      if (counts[a.region] !== undefined) {
+        counts[a.region]++;
+      }
+    });
+    return counts;
+  }, []);
+
+  // Filtered & sorted articles
+  const filteredArticles = useMemo(() => {
+    let result = [...WORLD_ARTICLES];
+
+    // Filter by category
+    if (activeCategory !== 'all') {
+      result = result.filter((a) => a.category === activeCategory);
+    }
+
+    // Filter by region
+    if (activeRegion !== 'all') {
+      result = result.filter((a) => a.region === activeRegion);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter((a) => {
+        const trans = a.translations[currentLanguage] || a.translations.en;
+        return (
+          trans.title.toLowerCase().includes(q) ||
+          trans.subtitle.toLowerCase().includes(q) ||
+          trans.summary.toLowerCase().includes(q) ||
+          a.author.toLowerCase().includes(q) ||
+          a.city.toLowerCase().includes(q) ||
+          a.country.toLowerCase().includes(q) ||
+          a.source.toLowerCase().includes(q) ||
+          a.tags.some((t) => t.toLowerCase().includes(q))
+        );
+      });
+    }
+
+    // Sort
+    if (sortBy === 'breaking') {
+      result.sort((a, b) => {
+        const priorityOrder: Record<string, number> = { lead: 3, breaking: 2, featured: 1, standard: 0 };
+        return (priorityOrder[b.importance] || 0) - (priorityOrder[a.importance] || 0);
+      });
+    } else if (sortBy === 'mostRead') {
+      result.sort((a, b) => b.views - a.views);
+    } else {
+      // Latest chronological
+      result.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }
+
+    return result;
+  }, [activeCategory, activeRegion, searchQuery, sortBy, currentLanguage]);
+
+  const savedArticlesList = useMemo(() => {
+    return WORLD_ARTICLES.filter((a) => savedIds.includes(a.id));
+  }, [savedIds]);
+
+  const isFiltered = activeCategory !== 'all' || activeRegion !== 'all' || searchQuery.trim().length > 0;
+
+  const handleResetFilters = () => {
+    setActiveCategory('all');
+    setActiveRegion('all');
+    setSearchQuery('');
+    setSortBy('latest');
+  };
+
+  // Divide into editorial tiers for front page layout
+  const leadStory = filteredArticles.find((a) => a.importance === 'lead') || filteredArticles[0];
+  const secondaryStories = filteredArticles.filter((a) => a.id !== leadStory?.id).slice(0, 4);
+  const remainingWireStories = filteredArticles.filter(
+    (a) => a.id !== leadStory?.id && !secondaryStories.some((s) => s.id === a.id)
+  );
+
+  return (
+    <div
+      className="min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors"
+      dir={currentLangConfig.dir}
+    >
+      {/* 1. Live Bureau Clocks & Market Ticker */}
+      <BureauClockBar bureaus={WORLD_BUREAUS} markets={INITIAL_MARKET_DATA} ui={ui} />
+
+      {/* 2. Breaking News Urgent Alert Banner */}
+      <BreakingTicker
+        articles={WORLD_ARTICLES}
+        currentLanguage={currentLanguage}
+        ui={ui}
+        onSelectArticle={(art) => setSelectedArticle(art)}
+      />
+
+      {/* 3. Header strictly complying with Top Bar Contract */}
+      <Header
+        currentLanguage={currentLanguage}
+        onSelectLanguage={(lang) => setCurrentLanguage(lang)}
+        activeCategory={activeCategory}
+        onSelectCategory={(cat) => {
+          setActiveCategory(cat);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        activeRegion={activeRegion}
+        onSelectRegion={(reg) => setActiveRegion(reg)}
+        ui={ui}
+        savedCount={savedIds.length}
+        onOpenSaved={() => setIsBookmarksOpen(true)}
+        onOpenAudioBriefing={() => setIsAudioBriefingOpen(true)}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode((prev) => !prev)}
+        onFocusSearch={() => setFocusSearchTrigger((prev) => prev + 1)}
+      />
+
+      {/* Main Content Arena */}
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full py-8">
+        {/* Search, Region & Sort Toolbar */}
+        <SearchFilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          activeRegion={activeRegion}
+          onSelectRegion={setActiveRegion}
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          ui={ui}
+          totalResults={filteredArticles.length}
+          onResetFilters={handleResetFilters}
+          isFiltered={isFiltered}
+          focusTrigger={focusSearchTrigger}
+        />
+
+        {/* Section Heading Banner when filtered */}
+        {isFiltered && (
+          <div className="mb-6 pb-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#9A3412] font-semibold">
+                {ui.regions[activeRegion] || activeRegion} · {ui.categories[activeCategory] || activeCategory}
+              </span>
+              <h2 className="font-editorial text-2xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+                {activeCategory === 'all' ? ui.allRegions : ui.categories[activeCategory]}
+              </h2>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {filteredArticles.length === 0 ? (
+          <div className="py-24 text-center border border-dashed border-stone-300 dark:border-stone-800 bg-white/50 dark:bg-stone-900/40 p-8 my-8">
+            <Newspaper className="w-10 h-10 text-stone-400 mx-auto mb-3" />
+            <h3 className="font-editorial text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">
+              {ui.noArticlesFound}
+            </h3>
+            <p className="text-stone-500 text-sm font-serif italic mb-6">
+              Try adjusting your query, selecting a different region, or switching to the Front Page.
+            </p>
+            <button
+              onClick={handleResetFilters}
+              className="px-5 py-2.5 bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-mono text-xs font-semibold hover:bg-[#9A3412] dark:hover:bg-[#9A3412] dark:hover:text-white transition-colors"
+            >
+              {ui.resetFilters}
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Front Page Broadsheet Hierarchy */}
+            {!isFiltered ? (
+              <>
+                {/* Salience Tier 1: Dominant Lead Story */}
+                {leadStory && (
+                  <EditorialCard
+                    article={leadStory}
+                    currentLanguage={currentLanguage}
+                    ui={ui}
+                    variant="lead"
+                    isSaved={savedIds.includes(leadStory.id)}
+                    onSelectArticle={(art) => setSelectedArticle(art)}
+                    onToggleSave={handleToggleSave}
+                    onShare={handleShare}
+                    onListen={handleQuickListen}
+                  />
+                )}
+
+                {/* Interactive World Regional Map & Hotspot Explorer */}
+                <InteractiveWorldMap
+                  activeRegion={activeRegion}
+                  onSelectRegion={(reg) => {
+                    setActiveRegion(reg);
+                    window.scrollTo({ top: 380, behavior: 'smooth' });
+                  }}
+                  ui={ui}
+                  articleCountsByRegion={articleCountsByRegion}
+                />
+
+                {/* Salience Tier 2: 3-Column Bento Grid of Featured Dispatches */}
+                <div className="mb-12">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800 mb-6">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#9A3412]" />
+                      <h3 className="font-editorial text-xl font-bold text-stone-900 dark:text-stone-100">
+                        {ui.editorsPick}
+                      </h3>
+                    </div>
+                    <span className="text-xs font-mono text-stone-500">
+                      Independent Wire · 10 Languages
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {secondaryStories.map((story) => (
+                      <EditorialCard
+                        key={story.id}
+                        article={story}
+                        currentLanguage={currentLanguage}
+                        ui={ui}
+                        variant="featured"
+                        isSaved={savedIds.includes(story.id)}
+                        onSelectArticle={(art) => setSelectedArticle(art)}
+                        onToggleSave={handleToggleSave}
+                        onShare={handleShare}
+                        onListen={handleQuickListen}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Salience Tier 3: Compact Wire Dispatches & Opinion Column */}
+                {remainingWireStories.length > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-stone-200 dark:border-stone-800 pt-8">
+                    {/* Left Column: Continuous Global Wire (8 cols) */}
+                    <div className="lg:col-span-8">
+                      <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-stone-800 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Compass className="w-4 h-4 text-[#9A3412]" />
+                          <h3 className="font-editorial text-lg font-bold text-stone-900 dark:text-stone-100">
+                            {ui.latestNews}
+                          </h3>
+                        </div>
+                        <span className="text-xs font-mono text-stone-400">
+                          Live Global Telemetry
+                        </span>
+                      </div>
+
+                      <div className="divide-y divide-stone-200 dark:divide-stone-800 border-t border-stone-200 dark:border-stone-800">
+                        {remainingWireStories.map((story) => (
+                          <EditorialCard
+                            key={story.id}
+                            article={story}
+                            currentLanguage={currentLanguage}
+                            ui={ui}
+                            variant="compact"
+                            isSaved={savedIds.includes(story.id)}
+                            onSelectArticle={(art) => setSelectedArticle(art)}
+                            onToggleSave={handleToggleSave}
+                            onShare={handleShare}
+                            onListen={handleQuickListen}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right Column: Opinion & Multilingual Editorial Statement (4 cols) */}
+                    <div className="lg:col-span-4 bg-stone-50 dark:bg-stone-900/60 p-6 border border-stone-200 dark:border-stone-800">
+                      <span className="text-[11px] font-mono uppercase tracking-widest text-[#9A3412] font-semibold block mb-2">
+                        Institutional Editorial
+                      </span>
+                      <h4 className="font-editorial text-lg font-bold text-stone-950 dark:text-stone-50 mb-3 leading-snug">
+                        The Global Chronicle Charter
+                      </h4>
+                      <p className="text-xs font-serif italic text-stone-600 dark:text-stone-300 leading-relaxed mb-4">
+                        "In an era fractured by algorithmic echo-chambers, our editorial duty is to present verified, deeply researched reports spanning every continent in the native languages of our global readership."
+                      </p>
+                      <div className="border-t border-stone-200 dark:border-stone-700/80 pt-3 text-[11px] font-mono text-stone-500">
+                        <span>Editorial Board · Geneva, London, Tokyo</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Filtered Results Standard Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredArticles.map((story) => (
+                  <EditorialCard
+                    key={story.id}
+                    article={story}
+                    currentLanguage={currentLanguage}
+                    ui={ui}
+                    variant="standard"
+                    isSaved={savedIds.includes(story.id)}
+                    onSelectArticle={(art) => setSelectedArticle(art)}
+                    onToggleSave={handleToggleSave}
+                    onShare={handleShare}
+                    onListen={handleQuickListen}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {/* 4. Newspaper Broadsheet Footer */}
+      <Footer
+        currentLanguage={currentLanguage}
+        onSelectLanguage={(lang) => setCurrentLanguage(lang)}
+        onSelectCategory={(cat) => {
+          setActiveCategory(cat);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        ui={ui}
+      />
+
+      {/* 5. Full Article Reader Modal with on-demand translation & TTS */}
+      <ArticleModal
+        article={selectedArticle}
+        currentLanguage={currentLanguage}
+        onClose={() => setSelectedArticle(null)}
+        ui={ui}
+        isSaved={selectedArticle ? savedIds.includes(selectedArticle.id) : false}
+        onToggleSave={(art) => handleToggleSave(art)}
+        onSelectArticle={(art) => setSelectedArticle(art)}
+        allArticles={WORLD_ARTICLES}
+      />
+
+      {/* 6. Daily 60-Second Radio Audio Briefing Modal */}
+      {isAudioBriefingOpen && (
+        <AudioBriefingModal
+          articles={WORLD_ARTICLES}
+          currentLanguage={currentLanguage}
+          onClose={() => setIsAudioBriefingOpen(false)}
+          ui={ui}
+          onSelectArticle={(art) => setSelectedArticle(art)}
+        />
+      )}
+
+      {/* 7. Bookmarks Reading List Drawer */}
+      <BookmarksDrawer
+        isOpen={isBookmarksOpen}
+        onClose={() => setIsBookmarksOpen(false)}
+        savedArticles={savedArticlesList}
+        currentLanguage={currentLanguage}
+        ui={ui}
+        onRemoveBookmark={handleRemoveBookmark}
+        onSelectArticle={(art) => setSelectedArticle(art)}
+        onClearAll={handleClearAllBookmarks}
+      />
+
+      {/* 8. Toast Feedback Message */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white border border-stone-700 px-4 py-2 text-xs font-mono shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <Check className="w-3.5 h-3.5 text-[#9A3412]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+    </div>
+  );
+}
