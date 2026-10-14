@@ -213,7 +213,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Copyright Strip */}
         <div className="mt-12 pt-6 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-stone-500 gap-3">
           <div>
-            © {new Date().getFullYear()} The Global Chronicle Media Foundation. All International Rights Reserved.
+            © {new Date().getFullYear()} THE GLOBAL CHRONICLES Media Foundation. All International Rights Reserved.
           </div>
           <div className="flex items-center gap-4">
             <span className="hover:text-stone-300 cursor-pointer">Editorial Code & Standards</span>

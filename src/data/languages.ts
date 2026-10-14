@@ -179,7 +179,7 @@ export interface UIStrings {
 
 export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
   en: {
-    brandTitle: 'THE GLOBAL CHRONICLE',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'Independent International Journalism Across Continents & Languages',
     edition: 'International Edition',
     breaking: 'Breaking News',
@@ -269,7 +269,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     newsletterSubtitle: 'Receive rigorous international reporting directly to your inbox every morning.',
     newsletterPlaceholder: 'Enter your email address...',
     subscribe: 'Subscribe to Briefing',
-    subscribedSuccess: 'Subscription confirmed. Welcome to The Global Chronicle.',
+    subscribedSuccess: 'Subscription confirmed. Welcome to THE GLOBAL CHRONICLES.',
   },
   es: {
     brandTitle: 'LA CRÓNICA GLOBAL',
