@@ -72,8 +72,8 @@ export const AlgorithmExplainerModal: React.FC<AlgorithmExplainerModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 w-full max-w-xl shadow-2xl p-6 sm:p-8 relative font-sans">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-5 sm:p-8 relative font-sans">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800 mb-6">
           <div>

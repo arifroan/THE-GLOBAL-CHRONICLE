@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Language, NewsCategory, Region } from '../types/news';
 import { SUPPORTED_LANGUAGES, UIStrings } from '../data/languages';
-import { Globe, Bookmark, Radio, Search, Moon, Sun, ChevronDown, Mail } from 'lucide-react';
+import { Globe, Bookmark, Radio, Search, Moon, Sun, ChevronDown, Mail, Menu, X, Check } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
 interface HeaderProps {
@@ -40,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectView,
 }) => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const categories: { id: NewsCategory; label: string }[] = [
     { id: 'all', label: ui.categories.all },
@@ -141,11 +142,12 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Zone 3: 1 Primary Action Area with Language Switcher & Utilities */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Zone 3: Primary Action Area with Language Switcher & Utilities */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Search trigger */}
             <button
               onClick={onFocusSearch}
-              className="p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
+              className="p-1.5 sm:p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
               title="Search"
               aria-label="Search"
             >
@@ -177,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Reading list button */}
             <button
               onClick={onOpenSaved}
-              className="relative p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
+              className="relative p-1.5 sm:p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
               title={ui.savedArticles}
               aria-label={ui.savedArticles}
             >
@@ -189,26 +191,27 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Dark mode toggle */}
+            {/* Dark mode toggle with explicit styling */}
             <button
               onClick={onToggleDarkMode}
-              className="p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
-              title={darkMode ? 'Switch to Light' : 'Switch to Dark'}
+              className="p-1.5 sm:p-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle dark mode"
             >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-stone-700 dark:text-stone-300" />}
             </button>
 
             {/* Multilingual Selector Popover */}
             <div className="relative">
               <button
                 onClick={() => setIsLangDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-stone-900 dark:bg-stone-100 dark:text-stone-900 rounded-none hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors whitespace-nowrap shrink-0"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white bg-stone-900 dark:bg-stone-100 dark:text-stone-900 rounded-none hover:bg-stone-800 dark:hover:bg-stone-200 transition-colors whitespace-nowrap shrink-0"
                 aria-expanded={isLangDropdownOpen}
                 aria-haspopup="listbox"
               >
                 <Globe className="w-3.5 h-3.5" />
-                <span className="font-semibold">{currentLangConfig.localName}</span>
+                <span className="font-semibold hidden sm:inline">{currentLangConfig.localName}</span>
+                <span className="font-semibold sm:hidden uppercase text-[11px]">{currentLangConfig.code}</span>
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </button>
 
@@ -253,6 +256,16 @@ export const Header: React.FC<HeaderProps> = ({
                 </>
               )}
             </div>
+
+            {/* Mobile Menu Hamburger */}
+            <button
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="lg:hidden p-1.5 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white border border-stone-200 dark:border-stone-800 transition-colors"
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              title="Editorial Sections Menu"
+            >
+              {isMobileMenuOpen ? <X className="w-4 h-4 text-[#9A3412]" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
@@ -305,6 +318,144 @@ export const Header: React.FC<HeaderProps> = ({
           })}
         </div>
       </div>
+
+      {/* Responsive Mobile Drawer Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 top-16 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-start animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 max-h-[85vh] overflow-y-auto p-5 shadow-2xl flex flex-col gap-5">
+            {/* Quick Actions Panel */}
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              {/* Theme Toggle Button */}
+              <button
+                onClick={() => {
+                  onToggleDarkMode();
+                }}
+                className="flex items-center justify-between p-3 border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200"
+              >
+                <span className="flex items-center gap-2">
+                  {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-stone-700" />}
+                  <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                </span>
+                <span className="text-[10px] text-stone-400 uppercase">{darkMode ? 'ON' : 'OFF'}</span>
+              </button>
+
+              {/* My News Button */}
+              <button
+                onClick={() => {
+                  onSelectView('my-news');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center justify-between p-3 border ${
+                  currentView === 'my-news'
+                    ? 'border-[#9A3412] bg-[#9A3412]/10 text-[#9A3412] font-bold'
+                    : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200'
+                }`}
+              >
+                <span className="flex items-center gap-1.5 truncate">
+                  <span>★</span>
+                  <span>{ui.myNews}</span>
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9A3412]" />
+              </button>
+
+              {/* Daily Digest */}
+              {onScrollToDigest && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onScrollToDigest();
+                  }}
+                  className="flex items-center gap-2 p-3 border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200"
+                >
+                  <Mail className="w-4 h-4 text-[#9A3412]" />
+                  <span>Daily Digest</span>
+                </button>
+              )}
+
+              {/* Audio Brief */}
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenAudioBriefing();
+                }}
+                className="flex items-center gap-2 p-3 border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200"
+              >
+                <Radio className="w-4 h-4 text-[#9A3412]" />
+                <span className="truncate">{ui.listenBriefing}</span>
+              </button>
+            </div>
+
+            {/* Language Switcher in Mobile Drawer */}
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 block mb-2">
+                Reading Language ({SUPPORTED_LANGUAGES.length} Languages)
+              </span>
+              <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+                {SUPPORTED_LANGUAGES.map((lang) => {
+                  const isSelected = lang.code === currentLanguage;
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        onSelectLanguage(lang.code);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`text-left px-2.5 py-1.5 text-xs flex items-center justify-between border transition-colors ${
+                        isSelected
+                          ? 'border-[#9A3412] bg-[#9A3412]/10 font-bold text-[#9A3412]'
+                          : 'border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950/50 text-stone-700 dark:text-stone-300'
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span>{lang.flag}</span>
+                        <span className="truncate">{lang.localName}</span>
+                      </span>
+                      {isSelected && <Check className="w-3 h-3 text-[#9A3412] shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Editorial Sections List */}
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 block mb-2">
+                Editorial Sections
+              </span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {categories.map((cat) => {
+                  const isActive = currentView === 'portal' && activeCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        onSelectView('portal');
+                        onSelectCategory(cat.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`text-left px-3 py-2 text-xs font-medium border transition-colors ${
+                        isActive
+                          ? 'bg-stone-900 text-white border-stone-900 dark:bg-stone-100 dark:text-stone-900'
+                          : 'bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-400'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Close Bar */}
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="w-full py-2.5 text-center text-xs font-mono font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 mt-2"
+            >
+              {ui.close}
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

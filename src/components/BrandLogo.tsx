@@ -220,14 +220,19 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   // Default: Header variant
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <Emblem size={36} />
-      <div className="flex flex-col text-left">
-        <span className="font-editorial text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-stone-950 dark:text-stone-50 whitespace-nowrap leading-none group-hover:text-[#9A3412] transition-colors">
+    <div className={`flex items-center gap-2 sm:gap-3 ${className}`}>
+      <div className="hidden xs:block">
+        <Emblem size={34} />
+      </div>
+      <div className="xs:hidden">
+        <Emblem size={28} />
+      </div>
+      <div className="flex flex-col text-left min-w-0">
+        <span className="font-editorial text-base sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-stone-950 dark:text-stone-50 whitespace-nowrap leading-none group-hover:text-[#9A3412] transition-colors truncate">
           THE GLOBAL CHRONICLES
         </span>
         {showTagline && (
-          <span className="hidden sm:block text-[9px] font-mono uppercase tracking-widest text-stone-500 dark:text-stone-400 mt-0.5">
+          <span className="hidden md:block text-[9px] font-mono uppercase tracking-widest text-stone-500 dark:text-stone-400 mt-0.5">
             Independent World Wire
           </span>
         )}

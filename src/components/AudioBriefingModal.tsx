@@ -98,15 +98,15 @@ export const AudioBriefingModal: React.FC<AudioBriefingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-stone-900 border border-stone-800 text-stone-100 w-full max-w-xl shadow-2xl p-6 sm:p-8 relative">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-stone-900 border border-stone-800 text-stone-100 w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-5 sm:p-8 relative">
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-stone-800 mb-6">
           <div className="flex items-center gap-2">
             <Radio className="w-5 h-5 text-[#9A3412] animate-pulse" />
             <div>
               <span className="text-[11px] font-mono uppercase tracking-widest text-stone-400 block">
-                The Global Chronicle Radio
+                THE GLOBAL CHRONICLES RADIO
               </span>
               <h3 className="font-editorial text-lg font-bold text-white">
                 {ui.audioBriefingTitle}

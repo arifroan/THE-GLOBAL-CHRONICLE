@@ -23,6 +23,7 @@ import { MyNewsPage } from './components/MyNewsPage';
 import { AlgorithmExplainerModal } from './components/AlgorithmExplainerModal';
 import { GlobalDailyDigest } from './components/GlobalDailyDigest';
 import { Footer } from './components/Footer';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { Sparkles, Compass, Newspaper, Check } from 'lucide-react';
 
 export default function App() {
@@ -36,7 +37,13 @@ export default function App() {
   });
 
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('global_chronicle_theme') === 'dark';
+    try {
+      const saved = localStorage.getItem('global_chronicle_theme');
+      if (saved) return saved === 'dark';
+      return typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
+    }
   });
 
   const [activeCategory, setActiveCategory] = useState<NewsCategory>('all');
@@ -113,9 +120,11 @@ export default function App() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
       localStorage.setItem('global_chronicle_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
       localStorage.setItem('global_chronicle_theme', 'light');
     }
   }, [darkMode]);
@@ -285,7 +294,7 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors"
+      className="min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors pb-16 md:pb-0"
       dir={currentLangConfig.dir}
     >
       {/* 1. Live Bureau Clocks & Market Ticker */}
@@ -628,9 +637,35 @@ export default function App() {
         ui={ui}
       />
 
-      {/* 10. Toast Feedback Message */}
+      {/* 10. Mobile Bottom Quick-Action Navigation Bar (Thumb reachable) */}
+      <MobileBottomNav
+        currentView={currentView}
+        onSelectView={(view) => {
+          setCurrentView(view);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        activeCategory={activeCategory}
+        onSelectCategory={(cat) => {
+          setActiveCategory(cat);
+          setCurrentView('portal');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        savedCount={savedIds.length}
+        onOpenSaved={() => setIsBookmarksOpen(true)}
+        onOpenAudioBriefing={() => setIsAudioBriefingOpen(true)}
+        onFocusSearch={() => {
+          setCurrentView('portal');
+          setFocusSearchTrigger((prev) => prev + 1);
+          window.scrollTo({ top: 200, behavior: 'smooth' });
+        }}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode((prev) => !prev)}
+        ui={ui}
+      />
+
+      {/* 11. Toast Feedback Message */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white border border-stone-700 px-4 py-2 text-xs font-mono shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white border border-stone-700 px-4 py-2 text-xs font-mono shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
           <Check className="w-3.5 h-3.5 text-[#9A3412]" />
           <span>{toastMessage}</span>
         </div>

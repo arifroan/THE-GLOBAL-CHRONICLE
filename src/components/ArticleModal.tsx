@@ -166,15 +166,15 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
       : 'text-sm sm:text-base leading-relaxed';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-xs flex items-center justify-center p-0 sm:p-4 md:p-6 animate-in fade-in duration-200">
       <div
-        className={`bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl relative ${
+        className={`bg-white dark:bg-stone-900 border-0 sm:border border-stone-200 dark:border-stone-800 w-full max-w-4xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col shadow-2xl relative ${
           isRTL ? 'text-right' : 'text-left'
         }`}
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         {/* Modal Top Utility Bar */}
-        <div className="sticky top-0 z-20 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+        <div className="sticky top-0 z-20 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
           {/* Section Breadcrumb & City */}
           <div className="flex items-center gap-2 text-xs font-mono text-stone-500 dark:text-stone-400">
             <BrandLogo variant="emblem-only" className="w-4 h-4" />
@@ -358,7 +358,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
         </div>
 
         {/* Scrollable Article Body */}
-        <div className="overflow-y-auto p-6 sm:p-8 md:p-10">
+        <div className="overflow-y-auto p-4 sm:p-8 md:p-10">
           {/* Metadata Kicker (Zero-Pill) */}
           <div className="flex items-center flex-wrap gap-2 text-xs font-mono text-stone-500 dark:text-stone-400 mb-4">
             <span className="uppercase tracking-widest font-bold text-[#9A3412]">

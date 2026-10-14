@@ -143,8 +143,8 @@ export const InteractiveWorldMap: React.FC<InteractiveWorldMapProps> = ({
           />
         </svg>
 
-        {/* Region hotspot buttons layered above map */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Region hotspot buttons layered above map (hidden on extra small screens, visible sm+) */}
+        <div className="absolute inset-0 pointer-events-none hidden sm:block">
           {regions.map((reg) => {
             const isSelected = activeRegion === reg.id;
             const count = articleCountsByRegion[reg.id] || 0;
@@ -173,6 +173,28 @@ export const InteractiveWorldMap: React.FC<InteractiveWorldMapProps> = ({
             );
           })}
         </div>
+      </div>
+
+      {/* Mobile-Friendly Region Selector Chips (Quick tap on mobile) */}
+      <div className="sm:hidden mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+        {regions.map((reg) => {
+          const isSelected = activeRegion === reg.id;
+          const count = articleCountsByRegion[reg.id] || 0;
+          return (
+            <button
+              key={reg.id}
+              onClick={() => onSelectRegion(reg.id)}
+              className={`px-2.5 py-1 text-xs font-mono whitespace-nowrap border shrink-0 transition-colors flex items-center gap-1.5 ${
+                isSelected
+                  ? 'bg-[#9A3412] text-white border-[#7C2D12] font-semibold'
+                  : 'bg-stone-50 dark:bg-stone-950 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800'
+              }`}
+            >
+              <span>{reg.label}</span>
+              <span className="opacity-70 text-[10px]">({count})</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
