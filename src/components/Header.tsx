@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Language, NewsCategory, Region } from '../types/news';
 import { SUPPORTED_LANGUAGES, UIStrings } from '../data/languages';
 import { Globe, Bookmark, Radio, Search, Moon, Sun, ChevronDown, Mail } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface HeaderProps {
   currentLanguage: Language;
@@ -70,17 +71,16 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Editorial Top Bar strictly complying with 3-zone contract */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between gap-8 h-16 border-b border-stone-100 dark:border-stone-800">
-          {/* Zone 1: Single text wordmark */}
+          {/* Zone 1: Masthead Brand Logo with Heraldic Seal */}
           <button
             onClick={() => {
               onSelectView('portal');
               onSelectCategory('all');
             }}
             className="text-left group cursor-pointer"
+            aria-label="THE GLOBAL CHRONICLES Home"
           >
-            <span className="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-stone-950 dark:text-stone-50 whitespace-nowrap shrink-0 group-hover:text-[#9A3412] transition-colors">
-              {ui.brandTitle}
-            </span>
+            <BrandLogo variant="header" showTagline={true} />
           </button>
 
           {/* Zone 2: 4-5 concise single-line nav links */}

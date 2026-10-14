@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Language, NewsCategory } from '../types/news';
 import { SUPPORTED_LANGUAGES, UIStrings } from '../data/languages';
 import { Globe, Mail, Check, ShieldCheck } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface FooterProps {
   currentLanguage: Language;
@@ -80,9 +81,7 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 text-xs">
           {/* Brand Col */}
           <div className="col-span-2">
-            <span className="font-editorial text-xl font-bold text-white block mb-2">
-              {ui.brandTitle}
-            </span>
+            <BrandLogo variant="footer" className="mb-3" />
             <p className="text-stone-400 leading-relaxed max-w-sm font-serif italic mb-4">
               {ui.brandTagline}
             </p>

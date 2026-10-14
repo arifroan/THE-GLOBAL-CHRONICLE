@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   BookmarkCheck,
 } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface GlobalDailyDigestProps {
   articles: Article[];
@@ -416,13 +417,8 @@ export const GlobalDailyDigest: React.FC<GlobalDailyDigestProps> = ({
           {/* Email Newsletter Container */}
           <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 max-w-3xl mx-auto shadow-sm">
             {/* Newsletter Masthead */}
-            <div className="text-center pb-4 border-b-2 border-stone-900 dark:border-stone-100 mb-6">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-stone-500 mb-1">
-                THE GLOBAL CHRONICLES · DAILY INTELLIGENCE
-              </div>
-              <h2 className="font-editorial text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-                The Morning Global Digest
-              </h2>
+            <div className="flex flex-col items-center text-center pb-4 border-b-2 border-stone-900 dark:border-stone-100 mb-6">
+              <BrandLogo variant="digest" className="mb-2" />
               <div className="text-xs font-mono text-stone-400 mt-1">
                 {new Intl.DateTimeFormat(digestLangConfig.speechLang, {
                   weekday: 'long',

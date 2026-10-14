@@ -272,7 +272,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'Subscription confirmed. Welcome to THE GLOBAL CHRONICLES.',
   },
   es: {
-    brandTitle: 'LA CRÓNICA GLOBAL',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'Periodismo Internacional Independiente a través de Continentes e Idiomas',
     edition: 'Edición Internacional',
     breaking: 'Última Hora',
@@ -365,7 +365,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'Suscripción confirmada. Bienvenido a La Crónica Global.',
   },
   fr: {
-    brandTitle: 'LA CHRONIQUE GLOBALE',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'Journalisme International Indépendant à Travers Continents et Langues',
     edition: 'Édition Internationale',
     breaking: 'Dernière Minute',
@@ -458,7 +458,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'Abonnement confirmé. Bienvenue à La Chronique Globale.',
   },
   zh: {
-    brandTitle: '环球纪事报',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: '跨越大陆与语言的独立国际新闻与深度报道',
     edition: '国际版',
     breaking: '突发新闻',
@@ -551,7 +551,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: '已成功订阅《环球纪事报》晨报。',
   },
   hi: {
-    brandTitle: 'द ग्लोबल क्रॉनिकल',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'महाद्वीपों और भाषाओं के पार स्वतंत्र अंतरराष्ट्रीय पत्रकारिता',
     edition: 'अंतरराष्ट्रीय संस्करण',
     breaking: 'ताज़ा ख़बर',
@@ -644,7 +644,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'सदस्यता की पुष्टि हुई। द ग्लोबल क्रॉनिकल में स्वागत है।',
   },
   de: {
-    brandTitle: 'DIE GLOBALE CHRONIK',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'Unabhängiger Internationaler Journalismus über Kontinente und Sprachen',
     edition: 'Internationale Ausgabe',
     breaking: 'Eilmeldung',
@@ -737,7 +737,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'Abonnement bestätigt. Willkommen bei der Globalen Chronik.',
   },
   ja: {
-    brandTitle: 'グローバル・クロニクル',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: '大陸と言語を越える独立した国際報道',
     edition: '国際版',
     breaking: '速報',
@@ -830,7 +830,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: '購読登録が完了しました。',
   },
   ar: {
-    brandTitle: 'السجل العالمي',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'صحافة دولية مستقلة عبر القارات واللغات المتعددة',
     edition: 'الطبعة الدولية',
     breaking: 'عاجل',
@@ -923,7 +923,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'تم تأكيد اشتراكك بنجاح في السجل العالمي.',
   },
   pt: {
-    brandTitle: 'A CRÔNICA GLOBAL',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'Jornalismo Internacional Independente em Todos os Continentes e Línguas',
     edition: 'Edição Internacional',
     breaking: 'Última Hora',
@@ -1016,7 +1016,7 @@ export const UI_TRANSLATIONS: Record<Language, UIStrings> = {
     subscribedSuccess: 'Inscrição confirmada. Bem-vindo à Crônica Global.',
   },
   ru: {
-    brandTitle: 'ГЛОБАЛЬНАЯ ХРОНИКА',
+    brandTitle: 'THE GLOBAL CHRONICLES',
     brandTagline: 'Независимая международная журналистика на всех континентах и языках',
     edition: 'Международный выпуск',
     breaking: 'Срочная новость',

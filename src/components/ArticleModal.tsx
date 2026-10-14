@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface ArticleModalProps {
   article: Article | null;
@@ -176,6 +177,11 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
         <div className="sticky top-0 z-20 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           {/* Section Breadcrumb & City */}
           <div className="flex items-center gap-2 text-xs font-mono text-stone-500 dark:text-stone-400">
+            <BrandLogo variant="emblem-only" className="w-4 h-4" />
+            <span className="font-editorial font-bold text-stone-900 dark:text-stone-100 hidden sm:inline">
+              THE GLOBAL CHRONICLES
+            </span>
+            <span className="hidden sm:inline">·</span>
             <span className="uppercase font-semibold text-[#9A3412]">
               {ui.categories[article.category] || article.category}
             </span>
