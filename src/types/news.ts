@@ -64,13 +64,27 @@ export interface ArticleSentiment {
   highlightWords: string[];
 }
 
+export interface TriSourcePerspective {
+  bbc?: string;
+  alJazeera?: string;
+  cnn?: string;
+}
+
+export interface NeutralityAudit {
+  neutralityScore: number; // e.g. 99 (percentage 0-100)
+  multiSourceCorroboration: boolean;
+  perspectives: TriSourcePerspective;
+  editorialStandards: string;
+  unbiasedVerdict: string;
+}
+
 export interface Article {
   id: string;
   category: NewsCategory;
   region: Region;
   country: string;
   city: string;
-  source: string; // e.g. "Reuters", "Associated Press", "AFP", "BBC News", "Bloomberg", etc.
+  source: string; // e.g. "The Global Chronicles AI Bureau", "Reuters", "BBC News", etc.
   sourceAuthority: number; // 0-100 rating based on verification standards and wire tier
   author: string;
   authorRole: string;
@@ -98,6 +112,12 @@ export interface Article {
   translations: Record<Language, ArticleTranslation>;
   tags: string[];
   sentiment?: ArticleSentiment;
+  // Real-time AI synchronization and tri-source attributes
+  isAiSynchronized?: boolean;
+  lastSyncedAt?: string;
+  neutralityAudit?: NeutralityAudit;
+  primarySources?: string[];
+  sourceUrl?: string;
 }
 
 export interface RankingScoreBreakdown {

@@ -9,6 +9,7 @@ interface FooterProps {
   onSelectLanguage: (lang: Language) => void;
   onSelectCategory: (cat: NewsCategory) => void;
   ui: UIStrings;
+  onOpenAiSources?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -16,6 +17,7 @@ export const Footer: React.FC<FooterProps> = ({
   onSelectLanguage,
   onSelectCategory,
   ui,
+  onOpenAiSources,
 }) => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -85,10 +87,23 @@ export const Footer: React.FC<FooterProps> = ({
             <p className="text-stone-400 leading-relaxed max-w-sm font-serif italic mb-4">
               {ui.brandTagline}
             </p>
-            <div className="flex items-center gap-2 text-stone-500 font-mono text-[11px]">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span>Independent Global Trust Standard</span>
-            </div>
+            {onOpenAiSources ? (
+              <button
+                onClick={onOpenAiSources}
+                className="flex items-center gap-2 text-stone-400 hover:text-white font-mono text-[11px] transition-colors group cursor-pointer text-left"
+                title="View Unbiased AI Tri-Source Verification Standards (BBC, Al Jazeera, CNN)"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="underline underline-offset-4 decoration-stone-600 group-hover:decoration-white">
+                  Independent Global Trust & AI Standards
+                </span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 text-stone-500 font-mono text-[11px]">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>Independent Global Trust Standard</span>
+              </div>
+            )}
           </div>
 
           {/* Categories col 1 */}

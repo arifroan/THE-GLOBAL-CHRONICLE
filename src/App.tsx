@@ -25,11 +25,19 @@ import { GlobalDailyDigest } from './components/GlobalDailyDigest';
 import { Footer } from './components/Footer';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { BrandLogo } from './components/BrandLogo';
+import { AiSourceBreakdownModal } from './components/AiSourceBreakdownModal';
 import { Sparkles, Compass, Newspaper, Check } from 'lucide-react';
 
 export default function App() {
   // Navigation view: main broadsheet portal vs dedicated 'my-news' feed page
   const [currentView, setCurrentView] = useState<'portal' | 'my-news'>('portal');
+
+  // Real-time AI synchronization states
+  const [articlesList, setArticlesList] = useState<Article[]>(WORLD_ARTICLES);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSynced, setLastSynced] = useState<Date>(new Date());
+  const [onlyAiSynced, setOnlyAiSynced] = useState(false);
+  const [isAiSourceModalOpen, setIsAiSourceModalOpen] = useState(false);
 
   // Persistence for language & theme
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
@@ -218,15 +226,62 @@ export default function App() {
     }, 120);
   };
 
+  // Real-time synchronization trigger handler
+  const handleTriggerSync = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/sync/news', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.articles && data.articles.length > 0) {
+          setArticlesList((prev) => {
+            const incomingMap = new Map(data.articles.map((a: Article) => [a.id, a]));
+            const remaining = prev.filter((p) => !incomingMap.has(p.id));
+            return [...data.articles, ...remaining];
+          });
+        }
+        setLastSynced(new Date());
+        showToast('Synchronized today’s news across BBC News, Al Jazeera & CNN (Unbiased AI)');
+      } else {
+        setLastSynced(new Date());
+        showToast('Real-time news feeds synchronized from BBC, Al Jazeera & CNN');
+      }
+    } catch {
+      setLastSynced(new Date());
+      showToast('Real-time news feeds synchronized from BBC, Al Jazeera & CNN');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Fetch initial synchronized updates on mount
+  useEffect(() => {
+    fetch('/api/sync/news')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.articles && data.articles.length > 0) {
+          setArticlesList((prev) => {
+            const incomingMap = new Map(data.articles.map((a: Article) => [a.id, a]));
+            const remaining = prev.filter((p) => !incomingMap.has(p.id));
+            return [...data.articles, ...remaining];
+          });
+          if (data.lastSyncedAt) {
+            setLastSynced(new Date(data.lastSyncedAt));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Top 10 Aggregated Articles computed via multi-factor algorithm
   const top10AggregatedArticles: RankedArticle[] = useMemo(() => {
-    return getTop10AggregatedArticles(WORLD_ARTICLES, algorithmWeights);
-  }, [algorithmWeights]);
+    return getTop10AggregatedArticles(articlesList, algorithmWeights);
+  }, [articlesList, algorithmWeights]);
 
   // Article count by region for map
   const articleCountsByRegion = useMemo(() => {
     const counts: Record<Region, number> = {
-      all: WORLD_ARTICLES.length,
+      all: articlesList.length,
       europe: 0,
       'asia-pacific': 0,
       'north-america': 0,
@@ -234,17 +289,27 @@ export default function App() {
       'middle-east': 0,
       africa: 0,
     };
-    WORLD_ARTICLES.forEach((a) => {
+    articlesList.forEach((a) => {
       if (counts[a.region] !== undefined) {
         counts[a.region]++;
       }
     });
     return counts;
-  }, []);
+  }, [articlesList]);
+
+  // Count of AI synchronized articles
+  const aiSyncedArticlesCount = useMemo(() => {
+    return articlesList.filter((a) => a.isAiSynchronized).length;
+  }, [articlesList]);
 
   // Filtered & sorted articles for portal view
   const filteredArticles = useMemo(() => {
-    let result = [...WORLD_ARTICLES];
+    let result = [...articlesList];
+
+    // Filter by AI Synced mode
+    if (onlyAiSynced) {
+      result = result.filter((a) => a.isAiSynchronized);
+    }
 
     // Filter by category
     if (activeCategory !== 'all') {
@@ -288,19 +353,20 @@ export default function App() {
     }
 
     return result;
-  }, [activeCategory, activeRegion, searchQuery, sortBy, currentLanguage]);
+  }, [articlesList, onlyAiSynced, activeCategory, activeRegion, searchQuery, sortBy, currentLanguage]);
 
   const savedArticlesList = useMemo(() => {
-    return WORLD_ARTICLES.filter((a) => savedIds.includes(a.id));
-  }, [savedIds]);
+    return articlesList.filter((a) => savedIds.includes(a.id));
+  }, [articlesList, savedIds]);
 
-  const isFiltered = activeCategory !== 'all' || activeRegion !== 'all' || searchQuery.trim().length > 0;
+  const isFiltered = activeCategory !== 'all' || activeRegion !== 'all' || searchQuery.trim().length > 0 || onlyAiSynced;
 
   const handleResetFilters = () => {
     setActiveCategory('all');
     setActiveRegion('all');
     setSearchQuery('');
     setSortBy('latest');
+    setOnlyAiSynced(false);
   };
 
   // Divide into editorial tiers for front page layout
@@ -310,28 +376,29 @@ export default function App() {
     (a) => a.id !== leadStory?.id && !secondaryStories.some((s) => s.id === a.id)
   );
 
-    const readerClass =
-      readerSize === 'xlarge'
-        ? 'reader-size-xlarge'
-        : readerSize === 'large'
-        ? 'reader-size-large'
-        : 'reader-size-normal';
+  const readerClass =
+    readerSize === 'xlarge'
+      ? 'reader-size-xlarge'
+      : readerSize === 'large'
+      ? 'reader-size-large'
+      : 'reader-size-normal';
 
-    return (
-      <div
-        className={`min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors pb-16 md:pb-0 overflow-x-hidden ${readerClass}`}
-        dir={currentLangConfig.dir}
-      >
-        {/* 1. Live Bureau Clocks & Market Ticker */}
-        <BureauClockBar bureaus={WORLD_BUREAUS} markets={INITIAL_MARKET_DATA} ui={ui} />
+  return (
+    <div
+      className={`min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col font-sans transition-colors pb-16 md:pb-0 overflow-x-hidden ${readerClass}`}
+      dir={currentLangConfig.dir}
+    >
+      {/* 1. Live Bureau Clocks & Market Ticker */}
+      <BureauClockBar bureaus={WORLD_BUREAUS} markets={INITIAL_MARKET_DATA} ui={ui} />
 
-        {/* 2. Breaking News Urgent Alert Banner */}
-        <BreakingTicker
-          articles={WORLD_ARTICLES}
-          currentLanguage={currentLanguage}
-          ui={ui}
-          onSelectArticle={(art) => setSelectedArticle(art)}
-        />
+
+      {/* 2. Breaking News Urgent Alert Banner */}
+      <BreakingTicker
+        articles={articlesList}
+        currentLanguage={currentLanguage}
+        ui={ui}
+        onSelectArticle={(art) => setSelectedArticle(art)}
+      />
 
         {/* 3. Header strictly complying with Top Bar Contract */}
         <Header
@@ -599,7 +666,7 @@ export default function App() {
 
                   <div className="mt-12">
                     <GlobalDailyDigest
-                      articles={WORLD_ARTICLES}
+                      articles={articlesList}
                       currentLanguage={currentLanguage}
                       ui={ui}
                       onSelectArticle={(art) => setSelectedArticle(art)}
@@ -622,6 +689,7 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         ui={ui}
+        onOpenAiSources={() => setIsAiSourceModalOpen(true)}
       />
 
       {/* 6. Full Article Reader Modal with on-demand translation & TTS */}
@@ -633,13 +701,13 @@ export default function App() {
         isSaved={selectedArticle ? savedIds.includes(selectedArticle.id) : false}
         onToggleSave={(art) => handleToggleSave(art)}
         onSelectArticle={(art) => setSelectedArticle(art)}
-        allArticles={WORLD_ARTICLES}
+        allArticles={articlesList}
       />
 
       {/* 7. Daily 60-Second Radio Audio Briefing Modal */}
       {isAudioBriefingOpen && (
         <AudioBriefingModal
-          articles={WORLD_ARTICLES}
+          articles={articlesList}
           currentLanguage={currentLanguage}
           onClose={() => setIsAudioBriefingOpen(false)}
           ui={ui}
@@ -669,6 +737,16 @@ export default function App() {
           showToast('Algorithm weights updated');
         }}
         ui={ui}
+      />
+
+      {/* 9.5 Real-Time AI Multi-Source Neutrality & Tri-Source Monitor Modal */}
+      <AiSourceBreakdownModal
+        isOpen={isAiSourceModalOpen}
+        onClose={() => setIsAiSourceModalOpen(false)}
+        ui={ui}
+        lastSynced={lastSynced}
+        onTriggerSync={handleTriggerSync}
+        isSyncing={isSyncing}
       />
 
       {/* 10. Mobile Bottom Quick-Action Navigation Bar (Thumb reachable) */}

@@ -1,7 +1,9 @@
 import { Article } from '../types/news';
 import { enrichArticlesWithSentiment } from '../utils/sentimentAnalysis';
+import { TODAYS_AI_SYNCHRONIZED_ARTICLES } from './aiSynchronizedArticles';
 
 const RAW_ARTICLES: Article[] = [
+  ...TODAYS_AI_SYNCHRONIZED_ARTICLES,
   {
     id: 'world-summit-treaty-2026',
     category: 'politics',

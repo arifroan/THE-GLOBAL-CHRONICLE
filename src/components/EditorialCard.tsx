@@ -2,7 +2,7 @@ import React from 'react';
 import { Article, Language } from '../types/news';
 import { UIStrings } from '../data/languages';
 import { EditorialArt } from './EditorialArt';
-import { Bookmark, Share2, Volume2, CheckCircle2 } from 'lucide-react';
+import { Bookmark, Share2, Volume2, CheckCircle2, Sparkles } from 'lucide-react';
 import { analyzeArticleSentiment } from '../utils/sentimentAnalysis';
 
 interface EditorialCardProps {
@@ -103,6 +103,21 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
                     <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>{ui.factChecked}</span>
+                    </span>
+                  </>
+                )}
+                {article.isAiSynchronized && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 border text-[11px] font-mono font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800"
+                      title="Synthesized by AI across BBC News, Al Jazeera & CNN"
+                    >
+                      <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                      <span>AI Wire (BBC · Al Jazeera · CNN)</span>
+                      {article.neutralityAudit?.neutralityScore && (
+                        <span className="text-[10px] opacity-80">[{article.neutralityAudit.neutralityScore}% Neutral]</span>
+                      )}
                     </span>
                   </>
                 )}
@@ -298,6 +313,18 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
               <span className={`w-1.5 h-1.5 rounded-full ${sentimentDotColor}`} />
               <span>{sentimentText}</span>
             </span>
+            {article.isAiSynchronized && (
+              <>
+                <span>·</span>
+                <span
+                  className="inline-flex items-center gap-1 text-[10.5px] font-mono font-semibold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 px-1.5 py-0.5"
+                  title="Triangulated AI Wire from BBC News, Al Jazeera & CNN"
+                >
+                  <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                  <span>AI Wire</span>
+                </span>
+              </>
+            )}
           </div>
 
           <h3 className="font-editorial text-lg sm:text-xl font-bold text-stone-950 dark:text-stone-100 leading-snug mb-2 group-hover:text-[#9A3412] transition-colors line-clamp-3">

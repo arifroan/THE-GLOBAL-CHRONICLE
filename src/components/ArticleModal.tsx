@@ -17,6 +17,8 @@ import {
   Play,
   RotateCcw,
   Sparkles,
+  ShieldCheck,
+  ExternalLink,
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
@@ -433,6 +435,74 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               {article.views.toLocaleString()} {ui.views} · {article.shares.toLocaleString()} {ui.shares}
             </div>
           </div>
+
+          {/* Real-time Unbiased Tri-Source Verification Matrix */}
+          {article.neutralityAudit && (
+            <div className="mb-8 p-4 sm:p-5 bg-[#FBF9F5] dark:bg-stone-950/90 border border-amber-300/80 dark:border-amber-900/60 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-stone-200 dark:border-stone-800">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100">
+                    Unbiased AI Tri-Source Verification
+                  </span>
+                  <span className="px-2 py-0.5 rounded-xs bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] font-bold">
+                    {article.neutralityAudit.neutralityScore}% Neutrality
+                  </span>
+                </div>
+                <div className="text-[11px] font-mono text-stone-500 flex items-center gap-2">
+                  <span>Triangulated:</span>
+                  <strong className="text-stone-700 dark:text-stone-300">BBC News · Al Jazeera · CNN</strong>
+                </div>
+              </div>
+
+              <p className="text-xs font-serif text-stone-700 dark:text-stone-300 mb-3 leading-relaxed">
+                {article.neutralityAudit.editorialStandards}
+              </p>
+
+              {/* 3 Channels Perspective Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs font-mono">
+                {article.neutralityAudit.perspectives.bbc && (
+                  <div className="p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-stone-100 dark:border-stone-800">
+                        <strong className="text-stone-950 dark:text-stone-50 font-bold">BBC News</strong>
+                        <span className="text-[10px] text-stone-400 font-normal">UK / Europe</span>
+                      </div>
+                      <p className="text-[11px] font-sans text-stone-600 dark:text-stone-400 leading-snug">
+                        {article.neutralityAudit.perspectives.bbc}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {article.neutralityAudit.perspectives.alJazeera && (
+                  <div className="p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-stone-100 dark:border-stone-800">
+                        <strong className="text-stone-950 dark:text-stone-50 font-bold">Al Jazeera</strong>
+                        <span className="text-[10px] text-stone-400 font-normal">Middle East</span>
+                      </div>
+                      <p className="text-[11px] font-sans text-stone-600 dark:text-stone-400 leading-snug">
+                        {article.neutralityAudit.perspectives.alJazeera}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {article.neutralityAudit.perspectives.cnn && (
+                  <div className="p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-stone-100 dark:border-stone-800">
+                        <strong className="text-stone-950 dark:text-stone-50 font-bold">CNN</strong>
+                        <span className="text-[10px] text-stone-400 font-normal">Americas</span>
+                      </div>
+                      <p className="text-[11px] font-sans text-stone-600 dark:text-stone-400 leading-snug">
+                        {article.neutralityAudit.perspectives.cnn}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Sentiment Lexicon Analysis Box */}
           <div className="mb-8 p-4 bg-stone-50 dark:bg-stone-950/70 border border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
