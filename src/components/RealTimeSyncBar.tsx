@@ -62,7 +62,7 @@ export const RealTimeSyncBar: React.FC<RealTimeSyncBarProps> = ({
   }, [lastSynced]);
 
   return (
-    <section aria-label="Real-time AI News Synchronization Bar" className="bg-[#1C1917] text-stone-200 border-b border-stone-800 text-xs py-2 px-4 sm:px-6">
+    <section aria-label="Real-time Multi-Bureau Wire Synchronization Bar" className="bg-[#1C1917] text-stone-200 border-b border-stone-800 text-xs py-2 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Left: Live status and Tri-Source Indicators */}
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-4">
@@ -73,7 +73,7 @@ export const RealTimeSyncBar: React.FC<RealTimeSyncBarProps> = ({
             </span>
             <span className="font-mono uppercase font-bold tracking-wider text-[11px] text-emerald-400 flex items-center gap-1">
               <Radio className="w-3.5 h-3.5" />
-              {isSyncing ? 'Synchronizing Live Feeds...' : 'Real-Time AI Sync Active'}
+              {isSyncing ? 'Synchronizing Live Feeds...' : 'Live Bureau Wire Active'}
             </span>
           </div>
 
@@ -130,7 +130,7 @@ export const RealTimeSyncBar: React.FC<RealTimeSyncBarProps> = ({
             <span className="text-stone-200 tabular-nums">{timeAgo}</span>
           </div>
 
-          {/* Filter toggle: View only AI Synced news */}
+          {/* Filter toggle: View only Syndicated Wire news */}
           <button
             onClick={onToggleOnlyAiSynced}
             className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded-xs border transition-colors flex items-center gap-1.5 ${
@@ -138,18 +138,18 @@ export const RealTimeSyncBar: React.FC<RealTimeSyncBarProps> = ({
                 ? 'bg-amber-600/30 border-amber-500 text-amber-300 hover:bg-amber-600/40'
                 : 'bg-stone-800/60 border-stone-700 text-stone-300 hover:bg-stone-800 hover:text-white'
             }`}
-            title="Filter feed to articles written by AI from BBC, Al Jazeera, and CNN"
+            title="Filter feed to articles corroborated across BBC, Al Jazeera, and CNN"
           >
             <SlidersHorizontal className="w-3 h-3" />
-            <span>AI Synced ({syncedArticlesCount})</span>
+            <span>Syndicated Wire ({syncedArticlesCount})</span>
           </button>
 
           {/* Learn / Inspect Tri-Source Modal Trigger */}
           <button
             onClick={onOpenSourceModal}
             className="p-1 text-stone-400 hover:text-stone-200 transition-colors"
-            title="Inspect AI Tri-Source Neutrality Methodology"
-            aria-label="Inspect AI Tri-Source Neutrality Methodology"
+            title="Inspect Tri-Bureau Neutrality Methodology"
+            aria-label="Inspect Tri-Bureau Neutrality Methodology"
           >
             <Info className="w-4 h-4" />
           </button>

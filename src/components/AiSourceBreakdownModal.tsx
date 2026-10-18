@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, ExternalLink, Radio, Sparkles, CheckCircle2, ArrowRight, RefreshCw, Layers } from 'lucide-react';
+import { X, ShieldCheck, ExternalLink, Radio, Globe, CheckCircle2, ArrowRight, RefreshCw, Layers, FileText } from 'lucide-react';
 import { UIStrings } from '../data/languages';
 
 interface AiSourceBreakdownModalProps {
@@ -55,7 +55,7 @@ export const AiSourceBreakdownModal: React.FC<AiSourceBreakdownModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Real-Time AI Multi-Source Neutrality Engine"
+      aria-label="International Bureau Syndicate & Verification Standards"
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
       onClick={onClose}
     >
@@ -69,10 +69,10 @@ export const AiSourceBreakdownModal: React.FC<AiSourceBreakdownModalProps> = ({
             <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <div>
               <h2 className="font-editorial text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100">
-                Real-Time AI Multi-Source Neutrality Engine
+                International Bureau Syndicate & Verification Standards
               </h2>
               <p className="text-xs font-mono text-stone-500 dark:text-stone-400">
-                Continuous live synchronization with BBC News · Al Jazeera · CNN
+                Continuous live syndication across BBC News · Al Jazeera · CNN
               </p>
             </div>
           </div>
@@ -90,11 +90,11 @@ export const AiSourceBreakdownModal: React.FC<AiSourceBreakdownModalProps> = ({
           {/* Methodology Card */}
           <div className="p-4 bg-stone-50 dark:bg-stone-950/80 border border-stone-200 dark:border-stone-800">
             <h3 className="text-xs font-mono uppercase tracking-widest font-bold text-[#9A3412] mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              How AI Dispatches Are Written With Zero Bias
+              <Globe className="w-3.5 h-3.5 text-amber-700" />
+              Empirical Tri-Bureau Neutrality Protocol
             </h3>
             <p className="text-sm font-serif text-stone-700 dark:text-stone-300 leading-relaxed mb-3">
-              To eliminate single-outlet slant, political partisanship, and sensationalism, reports in <em>The Global Chronicles</em> are continuously written and cross-referenced in real time by our AI Editorial Bureau using empirical source triangulation:
+              To eliminate single-outlet slant, political partisanship, and sensationalism, reports in <em>The Global Chronicles</em> are continuously cross-referenced and synthesized in real time across our international bureau network using empirical source triangulation:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
               <div className="p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
@@ -220,14 +220,14 @@ export const AiSourceBreakdownModal: React.FC<AiSourceBreakdownModalProps> = ({
             </div>
           </div>
 
-          {/* Interactive AI On-Demand Deep-Dive Synthesizer */}
+          {/* Interactive Bureau Wire Dossier Generator */}
           <div className="p-4 sm:p-5 border border-stone-200 dark:border-stone-800 bg-stone-50/60 dark:bg-stone-950/60">
             <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-stone-900 dark:text-stone-100 mb-1 flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-[#9A3412]" />
-              On-Demand AI Tri-Source Synthesis Tool
+              On-Demand Tri-Bureau Wire Dossier
             </h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 mb-3 font-sans">
-              Request the AI engine to write a brand-new, impartial multi-source report on any developing global story right now:
+              Request our international bureau network to compile a real-time, cross-corroborated dispatch on any developing global event:
             </p>
 
             <form onSubmit={handleGenerateDeepDive} className="flex flex-col sm:flex-row gap-2">
@@ -241,17 +241,17 @@ export const AiSourceBreakdownModal: React.FC<AiSourceBreakdownModalProps> = ({
               <button
                 type="submit"
                 disabled={isGenerating || !topicInput.trim()}
-                className="px-4 py-2 bg-[#9A3412] hover:bg-[#B45309] text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="px-4 py-2 bg-[#9A3412] hover:bg-[#B45309] text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {isGenerating ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Synthesizing...</span>
+                    <span>Corroborating Dispatches...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Synthesize Unbiased Report</span>
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Compile Wire Dossier</span>
                   </>
                 )}
               </button>
@@ -268,7 +268,7 @@ export const AiSourceBreakdownModal: React.FC<AiSourceBreakdownModalProps> = ({
               <div className="mt-4 p-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                    ● Real-Time AI Synthesis Ready (Score: {generatedResult.neutralityScore}% Neutral)
+                    ● Tri-Bureau Corroboration Verified (Index: {generatedResult.neutralityScore}% Impartial)
                   </span>
                   <span className="text-[10px] font-mono text-stone-400">
                     Triangulated: BBC · Al Jazeera · CNN

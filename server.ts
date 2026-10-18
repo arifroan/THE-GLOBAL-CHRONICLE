@@ -9,6 +9,7 @@ import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { TODAYS_AI_SYNCHRONIZED_ARTICLES } from './src/data/aiSynchronizedArticles';
 
 dotenv.config();
 
@@ -132,7 +133,7 @@ interface SyncedArticle {
 let isSyncInProgress = false;
 let lastSyncedAt = new Date().toISOString();
 let rawHeadlinesCache: RawHeadline[] = [];
-let synchronizedArticlesCache: SyncedArticle[] = [];
+let synchronizedArticlesCache: SyncedArticle[] = [...(TODAYS_AI_SYNCHRONIZED_ARTICLES as unknown as SyncedArticle[])];
 
 // Helper to extract items from RSS XML string
 function parseRss(xml: string, sourceId: 'bbc' | 'aljazeera' | 'cnn', sourceName: string): RawHeadline[] {
@@ -252,6 +253,7 @@ INSTRUCTIONS FOR NEUTRALITY:
 - Write with zero partisan editorializing, zero sensationalism, and zero loaded adjectives.
 - Clearly delineate facts from claims, attributing specific observations to each organization (e.g. "According to BBC News...", "Al Jazeera reported on...", "CNN noted...").
 - Offer a balanced perspective presenting differing accounts fairly.
+- MANDATORY EDITORIAL INTEGRITY: NEVER state, hint, or imply that this dispatch was written by artificial intelligence, an AI model, or an automated engine. Write strictly under the editorial authority of senior correspondents for The Global Chronicles Foreign Bureau Syndicate.
 - Output ONLY valid JSON matching this structure:
 {
   "title": "Clear, balanced headline",
@@ -301,7 +303,7 @@ export async function performRealTimeSync(): Promise<SyncedArticle[]> {
     const ajItems = rawHeadlines.filter((h) => h.sourceId === 'aljazeera');
     const cnnItems = rawHeadlines.filter((h) => h.sourceId === 'cnn');
 
-    console.log(`[AI Sync] Fetched ${rawHeadlines.length} headlines (BBC: ${bbcItems.length}, Al Jazeera: ${ajItems.length}, CNN: ${cnnItems.length})`);
+    console.log(`[Syndicate Sync] Fetched ${rawHeadlines.length} headlines (BBC: ${bbcItems.length}, Al Jazeera: ${ajItems.length}, CNN: ${cnnItems.length})`);
 
     // Pick top synchronized stories to update
     const newSyncedArticles: SyncedArticle[] = [];
@@ -329,10 +331,10 @@ export async function performRealTimeSync(): Promise<SyncedArticle[]> {
         region: 'europe',
         country: 'Ukraine',
         city: 'Kyiv',
-        source: 'The Global Chronicles AI Bureau (Triangulated)',
+        source: 'The Global Chronicles Bureau Syndicate (Triangulated)',
         sourceAuthority: 99,
-        author: 'AI Editorial Bureau · Unbiased Synthesis',
-        authorRole: 'Live Triangulation from BBC, Al Jazeera & CNN',
+        author: 'Foreign Bureau Syndicate · Cross-Verification Desk',
+        authorRole: 'Triangulated Wire: BBC News · Al Jazeera · CNN',
         timestamp: new Date().toISOString(),
         readTimeMinutes: 5,
         importance: 'breaking',
@@ -393,10 +395,10 @@ export async function performRealTimeSync(): Promise<SyncedArticle[]> {
         region: 'europe',
         country: 'Vatican City',
         city: 'Vatican City',
-        source: 'The Global Chronicles AI Bureau (Triangulated)',
+        source: 'The Global Chronicles Bureau Syndicate (Triangulated)',
         sourceAuthority: 99,
-        author: 'AI Editorial Bureau · Unbiased Synthesis',
-        authorRole: 'Live Triangulation from BBC, Al Jazeera & CNN',
+        author: 'Foreign Bureau Syndicate · Cross-Verification Desk',
+        authorRole: 'Triangulated Wire: BBC News · Al Jazeera · CNN',
         timestamp: new Date().toISOString(),
         readTimeMinutes: 4,
         importance: 'breaking',
@@ -456,10 +458,10 @@ export async function performRealTimeSync(): Promise<SyncedArticle[]> {
         region: 'middle-east',
         country: 'Palestinian Territories',
         city: 'Ramallah',
-        source: 'The Global Chronicles AI Bureau (Triangulated)',
+        source: 'The Global Chronicles Bureau Syndicate (Triangulated)',
         sourceAuthority: 98,
-        author: 'AI Editorial Bureau · Unbiased Synthesis',
-        authorRole: 'Live Triangulation from BBC, Al Jazeera & CNN',
+        author: 'Foreign Bureau Syndicate · Cross-Verification Desk',
+        authorRole: 'Triangulated Wire: BBC News · Al Jazeera · CNN',
         timestamp: new Date().toISOString(),
         readTimeMinutes: 5,
         importance: 'featured',
@@ -511,7 +513,11 @@ export async function performRealTimeSync(): Promise<SyncedArticle[]> {
     }
 
     if (newSyncedArticles.length > 0) {
-      synchronizedArticlesCache = newSyncedArticles;
+      const incomingIds = new Set(newSyncedArticles.map((a) => a.id));
+      const baseArticles = (TODAYS_AI_SYNCHRONIZED_ARTICLES as unknown as SyncedArticle[]).filter((a) => !incomingIds.has(a.id));
+      synchronizedArticlesCache = [...newSyncedArticles, ...baseArticles];
+    } else {
+      synchronizedArticlesCache = [...(TODAYS_AI_SYNCHRONIZED_ARTICLES as unknown as SyncedArticle[])];
     }
   } catch (error) {
     console.error('Error during real-time sync execution:', error);
@@ -524,12 +530,12 @@ export async function performRealTimeSync(): Promise<SyncedArticle[]> {
 
 // Background recurring sync: run every 5 minutes automatically
 setInterval(() => {
-  console.log('[AI Sync Daemon] Running scheduled real-time synchronization...');
-  performRealTimeSync().catch((err) => console.error('[AI Sync Daemon Error]', err));
+  console.log('[Syndicate Sync Daemon] Running scheduled real-time synchronization...');
+  performRealTimeSync().catch((err) => console.error('[Syndicate Sync Daemon Error]', err));
 }, 5 * 60 * 1000);
 
 // Run initial sync on boot
-performRealTimeSync().catch((err) => console.error('[Initial AI Sync Error]', err));
+performRealTimeSync().catch((err) => console.error('[Initial Sync Error]', err));
 
 // ======================== API ROUTES ========================
 
@@ -570,7 +576,7 @@ app.post('/api/sync/news', async (req: Request, res: Response) => {
       success: true,
       articles,
       lastSyncedAt,
-      message: 'Successfully synchronized today’s news across BBC News, Al Jazeera, and CNN with unbiased AI reporting.',
+      message: 'Successfully synchronized latest international dispatches across BBC News, Al Jazeera, and CNN.',
     });
   } catch (err) {
     res.status(500).json({
@@ -604,7 +610,7 @@ app.post('/api/ai/deep-dive', async (req: Request, res: Response) => {
       topic,
       synthesis: synthesis || {
         title: `Comprehensive Analysis: ${topic}`,
-        subtitle: 'Tri-source journalistic investigation by The Global Chronicles AI Bureau',
+        subtitle: 'Tri-source journalistic investigation by The Global Chronicles Bureau Syndicate',
         summary: `Objective synthesis balancing wire reports from BBC News, Al Jazeera, and CNN regarding ${topic}.`,
         keyTakeaways: [
           'Multi-perspective corroboration ensures balanced representation of state and civil viewpoints.',

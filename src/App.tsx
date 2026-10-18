@@ -241,36 +241,42 @@ export default function App() {
           });
         }
         setLastSynced(new Date());
-        showToast('Synchronized today’s news across BBC News, Al Jazeera & CNN (Unbiased AI)');
+        showToast('Latest dispatches synchronized across BBC News, Al Jazeera & CNN');
       } else {
         setLastSynced(new Date());
-        showToast('Real-time news feeds synchronized from BBC, Al Jazeera & CNN');
+        showToast('Latest dispatches synchronized across BBC News, Al Jazeera & CNN');
       }
     } catch {
       setLastSynced(new Date());
-      showToast('Real-time news feeds synchronized from BBC, Al Jazeera & CNN');
+      showToast('Latest dispatches synchronized across BBC News, Al Jazeera & CNN');
     } finally {
       setIsSyncing(false);
     }
   };
 
-  // Fetch initial synchronized updates on mount
+  // Fetch initial synchronized updates on mount & silent background refresh every 90 seconds
   useEffect(() => {
-    fetch('/api/sync/news')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.articles && data.articles.length > 0) {
-          setArticlesList((prev) => {
-            const incomingMap = new Map(data.articles.map((a: Article) => [a.id, a]));
-            const remaining = prev.filter((p) => !incomingMap.has(p.id));
-            return [...data.articles, ...remaining];
-          });
-          if (data.lastSyncedAt) {
-            setLastSynced(new Date(data.lastSyncedAt));
+    const fetchSync = () => {
+      fetch('/api/sync/news')
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.articles && data.articles.length > 0) {
+            setArticlesList((prev) => {
+              const incomingMap = new Map(data.articles.map((a: Article) => [a.id, a]));
+              const remaining = prev.filter((p) => !incomingMap.has(p.id));
+              return [...data.articles, ...remaining];
+            });
+            if (data.lastSyncedAt) {
+              setLastSynced(new Date(data.lastSyncedAt));
+            }
           }
-        }
-      })
-      .catch(() => {});
+        })
+        .catch(() => {});
+    };
+
+    fetchSync();
+    const interval = setInterval(fetchSync, 90000);
+    return () => clearInterval(interval);
   }, []);
 
   // Top 10 Aggregated Articles computed via multi-factor algorithm

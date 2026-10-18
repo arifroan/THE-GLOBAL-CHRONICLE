@@ -91,11 +91,11 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 onClick={onOpenAiSources}
                 className="flex items-center gap-2 text-stone-400 hover:text-white font-mono text-[11px] transition-colors group cursor-pointer text-left"
-                title="View Unbiased AI Tri-Source Verification Standards (BBC, Al Jazeera, CNN)"
+                title="View Tri-Bureau Editorial & Neutrality Standards (BBC, Al Jazeera, CNN)"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform shrink-0" />
                 <span className="underline underline-offset-4 decoration-stone-600 group-hover:decoration-white">
-                  Independent Global Trust & AI Standards
+                  Independent Global Trust & Bureau Standards
                 </span>
               </button>
             ) : (

@@ -109,7 +109,7 @@ export interface Article {
   views: number;
   commentsCount?: number;
   bookmarksCount?: number;
-  translations: Record<Language, ArticleTranslation>;
+  translations: Partial<Record<Language, ArticleTranslation>> & { en: ArticleTranslation };
   tags: string[];
   sentiment?: ArticleSentiment;
   // Real-time AI synchronization and tri-source attributes

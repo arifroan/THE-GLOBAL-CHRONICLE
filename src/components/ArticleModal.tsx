@@ -443,10 +443,10 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span className="font-mono text-xs font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100">
-                    Unbiased AI Tri-Source Verification
+                    Tri-Bureau Cross-Verification & Neutrality Audit
                   </span>
                   <span className="px-2 py-0.5 rounded-xs bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] font-bold">
-                    {article.neutralityAudit.neutralityScore}% Neutrality
+                    {article.neutralityAudit.neutralityScore}% Corroborated
                   </span>
                 </div>
                 <div className="text-[11px] font-mono text-stone-500 flex items-center gap-2">
