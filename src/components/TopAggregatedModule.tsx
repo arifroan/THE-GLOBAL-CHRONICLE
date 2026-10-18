@@ -91,7 +91,11 @@ export const TopAggregatedModule: React.FC<TopAggregatedModuleProps> = ({
                     {ui.categories[article.category] || article.category}
                   </span>
                   <span>·</span>
-                  <span className="tabular-nums">{ranking.hoursAgo}h ago</span>
+                  <span className="tabular-nums">
+                    {ranking.hoursAgo < 1
+                      ? `${Math.max(1, Math.round(ranking.hoursAgo * 60))}m ago`
+                      : `${ranking.hoursAgo}h ago`}
+                  </span>
                   <span>·</span>
                   <span className="text-stone-400 font-mono">
                     Score: <strong className="text-stone-900 dark:text-stone-100 font-bold">{ranking.totalScore}</strong>/100

@@ -375,6 +375,9 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 month: 'long',
                 day: 'numeric',
               })}
+              {Math.max(0, (Date.now() - new Date(article.timestamp).getTime()) / (1000 * 60 * 60)) < 24 && (
+                <span className="ml-1.5 text-amber-700 dark:text-amber-400 font-semibold font-mono text-[11px]">(Today's Wire)</span>
+              )}
             </span>
             <span>·</span>
             <span className="tabular-nums">{article.readTimeMinutes} {ui.minutes} {ui.readTime}</span>

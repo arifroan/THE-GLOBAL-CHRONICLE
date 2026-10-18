@@ -33,10 +33,22 @@ export const EditorialCard: React.FC<EditorialCardProps> = ({
   const regionLabel = ui.regions[article.region] || article.region;
 
   // Format relative timestamp
-  const dateFormatted = new Date(article.timestamp).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+  const now = Date.now();
+  const articleTime = new Date(article.timestamp).getTime();
+  const diffHours = Math.max(0, (now - articleTime) / (1000 * 60 * 60));
+  let dateFormatted = '';
+  if (diffHours < 1) {
+    const mins = Math.max(1, Math.round(diffHours * 60));
+    dateFormatted = `${mins}m ago`;
+  } else if (diffHours < 24) {
+    const hours = Math.round(diffHours);
+    dateFormatted = `Today · ${hours}h ago`;
+  } else {
+    dateFormatted = new Date(article.timestamp).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    });
+  }
 
   // Sentiment Lexicon Analysis
   const sentiment = article.sentiment || analyzeArticleSentiment(article, currentLanguage);
